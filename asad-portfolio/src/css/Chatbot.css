@@ -1089,7 +1089,6 @@
   right: -10px !important;
 
   min-width: 26px !important;
-  width: auto !important;
   height: 26px !important;
 
   padding: 0 7px !important;
@@ -1098,32 +1097,22 @@
   align-items: center !important;
   justify-content: center !important;
 
-  box-sizing: border-box !important;
-
-  border-radius: 50px !important;
-
   background: #ef4444 !important;
-  color: #ffffff !important;
+  color: #fff !important;
 
-  border: 3px solid #ffffff !important;
+  border: 3px solid #fff !important;
+  border-radius: 50% !important;
 
-  font-family: Arial, sans-serif !important;
   font-size: 11px !important;
   font-weight: 800 !important;
   line-height: 1 !important;
 
-  white-space: nowrap !important;
-
-  z-index: 100000 !important;
+  z-index: 999999 !important;
 
   opacity: 1 !important;
   visibility: visible !important;
 
   pointer-events: none !important;
-
-  box-shadow:
-    0 3px 10px rgba(0, 0, 0, 0.25),
-    0 0 0 2px rgba(239, 68, 68, 0.15) !important;
 }
 
 
