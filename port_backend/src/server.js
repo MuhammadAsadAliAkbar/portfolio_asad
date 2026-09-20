@@ -20,7 +20,7 @@ const PORT =
   process.env.PORT || 5000;
 
 const PYTHON_API =
-  process.env.PYTHON_API
+  process.env.PYTHON_API || "https://python-service-aau7.vercel.app"
 
 /* =========================================================
    MIDDLEWARE
