@@ -55,18 +55,14 @@ const getBotReply = (message) => {
     text.includes("salam") ||
     text.includes("assalam")
   ) {
-    return (
-      "Hi! 👋 Welcome to Muhammad Asad Ali Akbar's portfolio. How can I help you?"
-    );
+    return "Hi! 👋 Welcome to Muhammad Asad Ali Akbar's portfolio. How can I help you?";
   }
 
   if (
     text.includes("yourself") ||
     text.includes("about")
   ) {
-    return (
-      "I'm Muhammad Asad Ali Akbar, a Senior Full Stack / MERN Stack Developer with 5+ years of professional experience building scalable, secure and high-performance web applications."
-    );
+    return "I'm Muhammad Asad Ali Akbar, a Senior Full Stack / MERN Stack Developer with 5+ years of professional experience building scalable, secure and high-performance web applications.";
   }
 
   if (
@@ -74,27 +70,21 @@ const getBotReply = (message) => {
     text.includes("technology") ||
     text.includes("stack")
   ) {
-    return (
-      "My core technologies include React.js, Next.js, Angular, TypeScript, Node.js, Express.js, NestJS, MongoDB, MySQL, PostgreSQL, Redis, Docker, AWS, Kafka, RabbitMQ, Elasticsearch and REST/gRPC APIs. I also work with AI technologies including OpenAI, Gemini, LangChain, LangGraph, RAG and AI Agents."
-    );
+    return "My core technologies include React.js, Next.js, Angular, TypeScript, Node.js, Express.js, NestJS, MongoDB, MySQL, PostgreSQL, Redis, Docker, AWS, Kafka, RabbitMQ, Elasticsearch and REST/gRPC APIs. I also work with AI technologies including OpenAI, Gemini, LangChain, LangGraph, RAG and AI Agents.";
   }
 
   if (
     text.includes("project") ||
     text.includes("work")
   ) {
-    return (
-      "I've worked on enterprise dashboards, SaaS platforms, REST APIs, real-time applications, scalable backend systems, AI-powered applications and cloud-based solutions."
-    );
+    return "I've worked on enterprise dashboards, SaaS platforms, REST APIs, real-time applications, scalable backend systems, AI-powered applications and cloud-based solutions.";
   }
 
   if (
     text.includes("experience") ||
     text.includes("5 years")
   ) {
-    return (
-      "I have 5+ years of professional experience in full-stack development, working across frontend, backend, databases, APIs, cloud deployment, performance optimization and scalable software architecture."
-    );
+    return "I have 5+ years of professional experience in full-stack development, working across frontend, backend, databases, APIs, cloud deployment, performance optimization and scalable software architecture.";
   }
 
   if (
@@ -102,39 +92,29 @@ const getBotReply = (message) => {
     text.includes("hire") ||
     text.includes("email")
   ) {
-    return (
-      "You can contact me through email at crypton.futuremedia1989@gmail.com or connect with me on LinkedIn. You can also send me a message directly on WhatsApp."
-    );
+    return "You can contact me through email at crypton.futuremedia1989@gmail.com or connect with me on LinkedIn. You can also send me a message directly on WhatsApp.";
   }
 
   if (
     text.includes("whatsapp") ||
     text.includes("message")
   ) {
-    return (
-      "Sure! You can contact me directly on WhatsApp using the button below."
-    );
+    return "Sure! You can contact me directly on WhatsApp using the button below.";
   }
 
   if (
     text.includes("github")
   ) {
-    return (
-      "You can explore my GitHub projects here: github.com/cryptonfuture"
-    );
+    return "You can explore my GitHub projects here: github.com/cryptonfuture";
   }
 
   if (
     text.includes("linkedin")
   ) {
-    return (
-      "You can connect with me on LinkedIn through my portfolio's LinkedIn link."
-    );
+    return "You can connect with me on LinkedIn through my portfolio's LinkedIn link.";
   }
 
-  return (
-    "Thanks for your message! 😊 You can ask me about my experience, skills, projects, technologies or contact information."
-  );
+  return "Thanks for your message! 😊 You can ask me about my experience, skills, projects, technologies or contact information.";
 };
 
 /* =========================================================
@@ -143,7 +123,7 @@ const getBotReply = (message) => {
 
 function Chatbot() {
   /* =======================================================
-     CHATBOT OPEN / CLOSE
+     STATE
   ======================================================= */
 
   const [
@@ -151,52 +131,32 @@ function Chatbot() {
     setIsOpen,
   ] = useState(false);
 
-  /* =======================================================
-     MESSAGES
-  ======================================================= */
-
   const [
     messages,
     setMessages,
   ] = useState([
     {
-      id: 1,
+      id: "initial-message",
       sender: "bot",
       text:
         "Hi! 👋 I'm Asad's virtual assistant. How can I help you today?",
     },
   ]);
 
-  /* =======================================================
-     INPUT
-  ======================================================= */
-
   const [
     input,
     setInput,
   ] = useState("");
-
-  /* =======================================================
-     TYPING
-  ======================================================= */
 
   const [
     isTyping,
     setIsTyping,
   ] = useState(false);
 
-  /* =======================================================
-     PUSHER STATUS
-  ======================================================= */
-
   const [
     isPusherConnected,
     setIsPusherConnected,
   ] = useState(false);
-
-  /* =======================================================
-     NOTIFICATION COUNT
-  ======================================================= */
 
   const [
     notificationCount,
@@ -222,8 +182,85 @@ function Chatbot() {
   const notificationAudioRef =
     useRef(null);
 
+  /*
+   * IMPORTANT:
+   * Keeps IDs of messages already displayed.
+   * This prevents Pusher + local/API responses
+   * from creating duplicate messages.
+   */
+  const processedMessageIdsRef =
+    useRef(new Set());
+
   /* =======================================================
-     CREATE + UNLOCK NOTIFICATION AUDIO
+     ADD MESSAGE ONCE
+  ======================================================= */
+
+  const addMessageOnce = ({
+    id,
+    sender,
+    text,
+  }) => {
+    if (!text?.trim()) {
+      return false;
+    }
+
+    const messageId =
+      id ||
+      `${sender}-${text.trim()}`;
+
+    /*
+     * Already displayed?
+     */
+    if (
+      processedMessageIdsRef.current.has(
+        messageId
+      )
+    ) {
+      console.log(
+        "⛔ Duplicate message ignored:",
+        messageId
+      );
+
+      return false;
+    }
+
+    /*
+     * Mark as processed BEFORE adding.
+     */
+    processedMessageIdsRef.current.add(
+      messageId
+    );
+
+    setMessages(
+      (prev) => [
+        ...prev,
+        {
+          id:
+            messageId,
+
+          sender,
+
+          text:
+            text.trim(),
+        },
+      ]
+    );
+
+    return true;
+  };
+
+  /* =======================================================
+     CREATE MESSAGE ID
+  ======================================================= */
+
+  const createMessageId =
+    (prefix = "message") =>
+      `${prefix}-${Date.now()}-${Math.random()
+        .toString(36)
+        .slice(2, 10)}`;
+
+  /* =======================================================
+     NOTIFICATION AUDIO
   ======================================================= */
 
   useEffect(() => {
@@ -249,7 +286,9 @@ function Chatbot() {
           const notificationAudio =
             notificationAudioRef.current;
 
-          if (!notificationAudio) {
+          if (
+            !notificationAudio
+          ) {
             return;
           }
 
@@ -295,7 +334,7 @@ function Chatbot() {
             );
           } catch (error) {
             console.warn(
-              "⚠️ Notification sound waiting for user interaction:",
+              "⚠️ Waiting for user interaction:",
               error
             );
           }
@@ -357,14 +396,14 @@ function Chatbot() {
       };
     } catch (error) {
       console.error(
-        "❌ Notification audio initialization error:",
+        "❌ Audio initialization error:",
         error
       );
     }
   }, []);
 
   /* =======================================================
-     PLAY NOTIFICATION SOUND
+     PLAY NOTIFICATION
   ======================================================= */
 
   const playNotificationSound =
@@ -374,10 +413,6 @@ function Chatbot() {
           notificationAudioRef.current;
 
         if (!audio) {
-          console.warn(
-            "⚠️ Notification audio is not initialized"
-          );
-
           return;
         }
 
@@ -393,13 +428,9 @@ function Chatbot() {
           false;
 
         await audio.play();
-
-        console.log(
-          "🔊 Notification sound played"
-        );
       } catch (error) {
         console.warn(
-          "⚠️ Notification sound could not be played:",
+          "⚠️ Notification sound error:",
           error
         );
       }
@@ -426,7 +457,7 @@ function Chatbot() {
     };
 
   /* =======================================================
-     KEEP OPEN STATE IN REF
+     OPEN STATE REF
   ======================================================= */
 
   useEffect(() => {
@@ -441,20 +472,26 @@ function Chatbot() {
   }, [isOpen]);
 
   /* =======================================================
-     EXTERNAL OPEN / CLOSE / TOGGLE EVENTS
+     EXTERNAL EVENTS
   ======================================================= */
 
   useEffect(() => {
     const handleOpenChatbot =
       () => {
         setIsOpen(true);
-        setNotificationCount(0);
+
+        setNotificationCount(
+          0
+        );
       };
 
     const handleCloseChatbot =
       () => {
         setIsOpen(false);
-        setNotificationCount(0);
+
+        setNotificationCount(
+          0
+        );
       };
 
     const handleToggleChatbot =
@@ -509,13 +546,13 @@ function Chatbot() {
   }, []);
 
   /* =======================================================
-     PUSHER CONNECTION
+     PUSHER
   ======================================================= */
 
   useEffect(() => {
     if (!PUSHER_KEY) {
       console.warn(
-        "⚠️ Pusher key missing. Add VITE_PUSHER_KEY to .env"
+        "⚠️ VITE_PUSHER_KEY is missing."
       );
 
       return;
@@ -601,9 +638,17 @@ function Chatbot() {
       "portfolio-update",
       (data) => {
         console.log(
-          "🔔 Portfolio update received:",
+          "🔔 Portfolio update:",
           data
         );
+
+        const messageId =
+          data?.messageId ||
+          data?.id ||
+          data?.eventId ||
+          createMessageId(
+            "portfolio"
+          );
 
         const title =
           data?.title ||
@@ -613,34 +658,26 @@ function Chatbot() {
           data?.message ||
           "A new portfolio update is available.";
 
-        /*
-         * Chatbot type is generated from
-         * sendPortfolioUpdate().
-         */
         const isChatbotUpdate =
           data?.type ===
           "chatbot";
 
-        setMessages(
-          (prev) => [
-            ...prev,
-            {
-              id:
-                Date.now() +
-                Math.random(),
+        const wasAdded =
+          addMessageOnce({
+            id:
+              messageId,
 
-              sender:
-                "bot",
+            sender:
+              "bot",
 
-              text:
-                isChatbotUpdate
-                  ? updateMessage
-                  : `🔔 ${title}\n\n${updateMessage}`,
-            },
-          ]
-        );
+            text:
+              isChatbotUpdate
+                ? updateMessage
+                : `🔔 ${title}\n\n${updateMessage}`,
+          });
 
         if (
+          wasAdded &&
           !isChatbotUpdate
         ) {
           showNotification();
@@ -656,29 +693,27 @@ function Chatbot() {
       "client-message",
       (data) => {
         console.log(
-          "💬 New client message received:",
+          "💬 Client message:",
           data
         );
 
         if (
-          !data?.message
+          data?.message
         ) {
-          return;
+          showNotification();
         }
-
-        showNotification();
       }
     );
 
     /* =====================================================
-       GENERAL CHATBOT MESSAGE
+       CHATBOT MESSAGE
     ===================================================== */
 
     channel.bind(
       "chatbot-message",
       (data) => {
         console.log(
-          "💬 Chatbot message received:",
+          "💬 Chatbot message:",
           data
         );
 
@@ -688,27 +723,34 @@ function Chatbot() {
           return;
         }
 
-        setMessages(
-          (prev) => [
-            ...prev,
-            {
-              id:
-                Date.now() +
-                Math.random(),
+        const messageId =
+          data?.messageId ||
+          data?.id ||
+          data?.eventId ||
+          `${data?.sender || "bot"}-${data.message}`;
 
-              sender:
-                data.sender ===
-                "user"
-                  ? "user"
-                  : "bot",
+        const wasAdded =
+          addMessageOnce({
+            id:
+              messageId,
 
-              text:
-                data.message,
-            },
-          ]
-        );
+            sender:
+              data.sender ===
+              "user"
+                ? "user"
+                : "bot",
 
-        showNotification();
+            text:
+              data.message,
+          });
+
+        if (
+          wasAdded &&
+          data.sender !==
+            "user"
+        ) {
+          showNotification();
+        }
       }
     );
 
@@ -720,7 +762,7 @@ function Chatbot() {
       "ai-response",
       (data) => {
         console.log(
-          "🤖 AI response received:",
+          "🤖 AI response:",
           data
         );
 
@@ -730,26 +772,31 @@ function Chatbot() {
           return;
         }
 
-        setIsTyping(false);
+        const messageId =
+          data?.messageId ||
+          data?.id ||
+          data?.eventId ||
+          `ai-${data.reply}`;
 
-        setMessages(
-          (prev) => [
-            ...prev,
-            {
-              id:
-                Date.now() +
-                Math.random(),
+        const wasAdded =
+          addMessageOnce({
+            id:
+              messageId,
 
-              sender:
-                "bot",
+            sender:
+              "bot",
 
-              text:
-                data.reply,
-            },
-          ]
-        );
+            text:
+              data.reply,
+          });
 
-        showNotification();
+        if (wasAdded) {
+          setIsTyping(
+            false
+          );
+
+          showNotification();
+        }
       }
     );
 
@@ -761,7 +808,7 @@ function Chatbot() {
       "pusher:subscription_error",
       (error) => {
         console.error(
-          "❌ Pusher subscription error:",
+          "❌ Subscription error:",
           error
         );
       }
@@ -828,15 +875,12 @@ function Chatbot() {
       title = "Portfolio Update",
       message,
       type = "portfolio",
+      messageId,
     }) => {
       try {
         if (
           !message?.trim()
         ) {
-          console.warn(
-            "⚠️ Portfolio update message is required."
-          );
-
           return null;
         }
 
@@ -848,17 +892,9 @@ function Chatbot() {
           return null;
         }
 
-        const url =
-          `${API_URL}/api/portfolio/update`;
-
-        console.log(
-          "📡 Portfolio Update API:",
-          url
-        );
-
         const response =
           await fetch(
-            url,
+            `${API_URL}/api/portfolio/update`,
             {
               method:
                 "POST",
@@ -880,6 +916,15 @@ function Chatbot() {
                     message.trim(),
 
                   type,
+
+                  /*
+                   * IMPORTANT:
+                   * Backend should return/broadcast
+                   * this same ID if possible.
+                   */
+                  messageId:
+                    messageId ||
+                    undefined,
                 }),
             }
           );
@@ -912,7 +957,7 @@ function Chatbot() {
         }
 
         console.log(
-          "📥 Portfolio API response:",
+          "📥 Portfolio API:",
           {
             status:
               response.status,
@@ -939,15 +984,10 @@ function Chatbot() {
           );
         }
 
-        console.log(
-          "✅ Portfolio update sent:",
-          data
-        );
-
         return data;
       } catch (error) {
         console.error(
-          "❌ Portfolio update API error:",
+          "❌ Portfolio API error:",
           error
         );
 
@@ -963,15 +1003,12 @@ function Chatbot() {
     async ({
       message,
       sender = "bot",
+      messageId,
     }) => {
       try {
         if (
           !message?.trim()
         ) {
-          console.warn(
-            "⚠️ Chatbot broadcast message is required."
-          );
-
           return null;
         }
 
@@ -983,17 +1020,9 @@ function Chatbot() {
           return null;
         }
 
-        const url =
-          `${API_URL}/api/chatbot/broadcast`;
-
-        console.log(
-          "📡 Chatbot Broadcast API:",
-          url
-        );
-
         const response =
           await fetch(
-            url,
+            `${API_URL}/api/chatbot/broadcast`,
             {
               method:
                 "POST",
@@ -1012,6 +1041,15 @@ function Chatbot() {
                     message.trim(),
 
                   sender,
+
+                  /*
+                   * IMPORTANT:
+                   * This allows backend/Pusher to
+                   * preserve the same message ID.
+                   */
+                  messageId:
+                    messageId ||
+                    undefined,
                 }),
             }
           );
@@ -1044,7 +1082,7 @@ function Chatbot() {
         }
 
         console.log(
-          "📥 Chatbot Broadcast response:",
+          "📥 Broadcast API:",
           {
             status:
               response.status,
@@ -1058,7 +1096,7 @@ function Chatbot() {
         ) {
           throw new Error(
             data?.message ||
-              `Chatbot broadcast failed: ${response.status}`
+              `Broadcast failed: ${response.status}`
           );
         }
 
@@ -1067,19 +1105,14 @@ function Chatbot() {
         ) {
           throw new Error(
             data?.message ||
-              "Chatbot broadcast API returned success=false"
+              "Broadcast API returned success=false"
           );
         }
-
-        console.log(
-          "✅ Chatbot broadcast sent:",
-          data
-        );
 
         return data;
       } catch (error) {
         console.error(
-          "❌ Chatbot broadcast API error:",
+          "❌ Broadcast API error:",
           error
         );
 
@@ -1106,24 +1139,28 @@ function Chatbot() {
       }
 
       /* ===================================================
+         UNIQUE USER MESSAGE ID
+      =================================================== */
+
+      const userMessageId =
+        createMessageId(
+          "user"
+        );
+
+      /* ===================================================
          ADD USER MESSAGE LOCALLY
       =================================================== */
 
-      setMessages(
-        (prev) => [
-          ...prev,
-          {
-            id:
-              Date.now(),
+      addMessageOnce({
+        id:
+          userMessageId,
 
-            sender:
-              "user",
+        sender:
+          "user",
 
-            text:
-              message,
-          },
-        ]
-      );
+        text:
+          message,
+      });
 
       setInput("");
 
@@ -1137,13 +1174,17 @@ function Chatbot() {
 
       await broadcastChatbotMessage({
         message,
+
         sender:
           "user",
+
+        messageId:
+          userMessageId,
       });
 
       try {
         /* =================================================
-           CHAT API
+           CHECK API URL
         ================================================= */
 
         if (!API_URL) {
@@ -1151,6 +1192,10 @@ function Chatbot() {
             "VITE_API_URL is not configured."
           );
         }
+
+        /* =================================================
+           CHAT API
+        ================================================= */
 
         console.log(
           "📡 Calling Chat API:",
@@ -1205,97 +1250,78 @@ function Chatbot() {
           const botReply =
             data.reply;
 
-          /* ===============================================
-             1. BROADCAST CHATBOT RESPONSE
-          =============================================== */
-
-          const broadcastResult =
-            await broadcastChatbotMessage({
-              message:
-                botReply,
-
-              sender:
-                "bot",
-            });
-
-          console.log(
-            "💬 Bot broadcast result:",
-            broadcastResult
-          );
-
-          /* ===============================================
-             2. PORTFOLIO UPDATE API
-             
-             type = chatbot so the portfolio-update
-             listener knows this is a chatbot response.
-          =============================================== */
-
-          const portfolioResult =
-            await sendPortfolioUpdate({
-              title:
-                "AI Assistant",
-
-              message:
-                botReply,
-
-              type:
-                "chatbot",
-            });
-
-          console.log(
-            "🔔 Bot portfolio update result:",
-            portfolioResult
-          );
-
-          /* ===============================================
-             FALLBACK LOCAL DISPLAY
-             
-             If Pusher is not connected, display reply
-             directly.
-          =============================================== */
-
-          if (
-            !isPusherConnected
-          ) {
-            setIsTyping(
-              false
+          const botMessageId =
+            data?.messageId ||
+            createMessageId(
+              "bot"
             );
 
-            setMessages(
-              (prev) => [
-                ...prev,
-                {
-                  id:
-                    Date.now() +
-                    Math.random(),
+          /* ===============================================
+             ADD BOT MESSAGE LOCALLY ONLY ONCE
+             
+             This is the most important change.
+          =============================================== */
 
-                  sender:
-                    "bot",
+          addMessageOnce({
+            id:
+              botMessageId,
 
-                  text:
-                    botReply,
-                },
-              ]
-            );
-          } else {
-            /*
-             * Pusher will normally deliver the response.
-             * Keep typing state for a short period as
-             * protection if the event arrives late.
-             */
-            setTimeout(() => {
-              setIsTyping(
-                false
-              );
-            }, 1500);
-          }
+            sender:
+              "bot",
+
+            text:
+              botReply,
+          });
+
+          /* ===============================================
+             BROADCAST BOT MESSAGE
+          =============================================== */
+
+          await broadcastChatbotMessage({
+            message:
+              botReply,
+
+            sender:
+              "bot",
+
+            messageId:
+              botMessageId,
+          });
+
+          /* ===============================================
+             PORTFOLIO UPDATE
+             
+             Same message ID.
+          =============================================== */
+
+          await sendPortfolioUpdate({
+            title:
+              "AI Assistant",
+
+            message:
+              botReply,
+
+            type:
+              "chatbot",
+
+            messageId:
+              botMessageId,
+          });
+
+          /*
+           * Stop typing immediately because we already
+           * displayed the response locally.
+           */
+          setIsTyping(
+            false
+          );
         } else {
           setIsTyping(
             false
           );
 
           console.warn(
-            "⚠️ Chat API did not return a reply."
+            "⚠️ Chat API did not return reply."
           );
         }
       } catch (error) {
@@ -1305,7 +1331,7 @@ function Chatbot() {
         );
 
         /* =================================================
-           FALLBACK RESPONSE
+           FALLBACK
         ================================================= */
 
         const fallbackReply =
@@ -1313,8 +1339,28 @@ function Chatbot() {
             message
           );
 
+        const fallbackMessageId =
+          createMessageId(
+            "fallback"
+          );
+
         /* =================================================
-           BROADCAST FALLBACK RESPONSE
+           SHOW FALLBACK LOCALLY
+        ================================================= */
+
+        addMessageOnce({
+          id:
+            fallbackMessageId,
+
+          sender:
+            "bot",
+
+          text:
+            fallbackReply,
+        });
+
+        /* =================================================
+           BROADCAST FALLBACK
         ================================================= */
 
         await broadcastChatbotMessage({
@@ -1323,10 +1369,13 @@ function Chatbot() {
 
           sender:
             "bot",
+
+          messageId:
+            fallbackMessageId,
         });
 
         /* =================================================
-           PORTFOLIO UPDATE FOR FALLBACK
+           PORTFOLIO UPDATE
         ================================================= */
 
         await sendPortfolioUpdate({
@@ -1338,34 +1387,14 @@ function Chatbot() {
 
           type:
             "chatbot",
+
+          messageId:
+            fallbackMessageId,
         });
 
-        /* =================================================
-           SHOW FALLBACK LOCALLY
-        ================================================= */
-
-        setTimeout(() => {
-          setIsTyping(
-            false
-          );
-
-          setMessages(
-            (prev) => [
-              ...prev,
-              {
-                id:
-                  Date.now() +
-                  Math.random(),
-
-                sender:
-                  "bot",
-
-                text:
-                  fallbackReply,
-              },
-            ]
-          );
-        }, 700);
+        setIsTyping(
+          false
+        );
       }
     };
 
@@ -1376,7 +1405,8 @@ function Chatbot() {
   const handleKeyDown =
     (event) => {
       if (
-        event.key === "Enter" &&
+        event.key ===
+          "Enter" &&
         !event.shiftKey
       ) {
         event.preventDefault();
@@ -1386,7 +1416,7 @@ function Chatbot() {
     };
 
   /* =======================================================
-     OPEN CHATBOT
+     OPEN
   ======================================================= */
 
   const openChatbot =
@@ -1401,7 +1431,7 @@ function Chatbot() {
     };
 
   /* =======================================================
-     CLOSE CHATBOT
+     CLOSE
   ======================================================= */
 
   const closeChatbot =
@@ -1416,7 +1446,7 @@ function Chatbot() {
     };
 
   /* =======================================================
-     TOGGLE CHATBOT
+     TOGGLE
   ======================================================= */
 
   const toggleChatbot =
@@ -1444,7 +1474,7 @@ function Chatbot() {
   return (
     <>
       {/* ===================================================
-          FLOATING CHATBOT BUTTON
+          FLOATING BUTTON
       =================================================== */}
 
       <motion.button
@@ -1478,11 +1508,7 @@ function Chatbot() {
               ? "fas fa-chevron-down"
               : "fas fa-robot"
           }
-        ></i>
-
-        {/* =================================================
-            NOTIFICATION COUNT
-        ================================================= */}
+        />
 
         <AnimatePresence>
           {notificationCount >
@@ -1723,6 +1749,10 @@ function Chatbot() {
                   }
                 />
               </div>
+
+              {/* =================================================
+                  QUICK QUESTIONS
+              ================================================= */}
 
               {messages.length <=
                 1 && (
