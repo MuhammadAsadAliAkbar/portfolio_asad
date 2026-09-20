@@ -1,0 +1,988 @@
+/* =========================================
+   PROJECTS SECTION
+========================================= */
+
+.projects {
+  position: relative;
+  overflow: hidden;
+  padding: 110px 0;
+}
+
+/* Background */
+.projects-bg-orb {
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+.projects-bg-orb-1 {
+  top: 5%;
+  left: -180px;
+  background: #00e5c3;
+}
+
+.projects-bg-orb-2 {
+  right: -180px;
+  bottom: 5%;
+  background: #7c3aed;
+}
+
+
+/* =========================================
+   HEADING
+========================================= */
+
+.projects-heading {
+  text-align: center;
+}
+
+.heading-number {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  margin-bottom: 18px;
+
+  border: 1px solid rgba(0, 229, 195, 0.25);
+  border-radius: 30px;
+
+  background: rgba(0, 229, 195, 0.06);
+
+  color: #00e5c3;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.projects-heading h2 {
+  font-size: clamp(40px, 5vw, 64px);
+  font-weight: 800;
+  line-height: 1.05;
+  margin: 0;
+  letter-spacing: -2px;
+}
+
+.projects-heading h2 span {
+  background: linear-gradient(
+    90deg,
+    #00e5c3,
+    #00b8ff,
+    #8b5cf6
+  );
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.projects-heading p {
+  margin-top: 18px;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 16px;
+}
+
+
+/* =========================================
+   FILTERS
+========================================= */
+
+.project-filters {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+
+  margin: 45px 0 55px;
+}
+
+.project-filters button {
+  position: relative;
+  overflow: hidden;
+
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.035);
+
+  color: rgba(255, 255, 255, 0.58);
+
+  padding: 11px 20px;
+  border-radius: 12px;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    color 0.3s ease,
+    border 0.3s ease,
+    transform 0.3s ease;
+}
+
+.project-filters button:hover {
+  color: #fff;
+  border-color: rgba(0, 229, 195, 0.35);
+  transform: translateY(-2px);
+}
+
+.project-filters button.active {
+  color: #061412;
+  border-color: transparent;
+  background: linear-gradient(
+    135deg,
+    #00e5c3,
+    #00b8ff
+  );
+
+  box-shadow:
+    0 8px 30px rgba(0, 229, 195, 0.2);
+}
+
+
+/* =========================================
+   GRID
+========================================= */
+
+.projects-grid {
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 28px;
+}
+
+
+/* =========================================
+   CARD
+========================================= */
+
+.project-card {
+  position: relative;
+
+  overflow: hidden;
+
+  border-radius: 22px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.075),
+      rgba(255, 255, 255, 0.025)
+    );
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.18);
+
+  backdrop-filter: blur(20px);
+
+  transition:
+    border-color 0.4s ease,
+    box-shadow 0.4s ease;
+}
+
+.project-card:hover {
+  border-color: rgba(0, 229, 195, 0.35);
+
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.3),
+    0 0 35px rgba(0, 229, 195, 0.08);
+}
+
+
+/* =========================================
+   IMAGE
+========================================= */
+
+.project-image {
+  position: relative;
+
+  height: 250px;
+
+  overflow: hidden;
+
+  background: #071614;
+}
+
+.project-image-inner {
+  position: absolute;
+  inset: 0;
+
+  transform-origin: center;
+}
+
+.project-image-inner img {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+  object-position: center;
+
+  transition:
+    filter 0.5s ease;
+}
+
+.project-card:hover
+.project-image-inner img {
+  filter: saturate(1.15) contrast(1.05);
+}
+
+
+/* Grid */
+.project-image-grid {
+  position: absolute;
+  inset: 0;
+
+  z-index: 2;
+
+  pointer-events: none;
+
+  opacity: 0.15;
+
+  background-image:
+    linear-gradient(
+      rgba(255, 255, 255, 0.12) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.12) 1px,
+      transparent 1px
+    );
+
+  background-size: 35px 35px;
+}
+
+
+/* Glow */
+.project-image-glow {
+  position: absolute;
+
+  width: 180px;
+  height: 180px;
+
+  top: -80px;
+  right: -60px;
+
+  z-index: 3;
+
+  border-radius: 50%;
+
+  background: #00e5c3;
+
+  filter: blur(80px);
+
+  opacity: 0.2;
+}
+
+
+/* Gradient */
+.project-image-overlay {
+  position: absolute;
+  inset: 0;
+
+  z-index: 4;
+
+  background:
+    linear-gradient(
+      to bottom,
+      transparent 30%,
+      rgba(3, 10, 9, 0.75) 100%
+    );
+
+  pointer-events: none;
+}
+
+
+/* Number */
+.project-number {
+  position: absolute;
+
+  top: 18px;
+  left: 18px;
+
+  z-index: 6;
+
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background: rgba(5, 15, 14, 0.65);
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+
+  backdrop-filter: blur(10px);
+
+  color: #fff;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+
+/* Type */
+.project-type {
+  position: absolute;
+
+  left: 18px;
+  bottom: 18px;
+
+  z-index: 7;
+
+  padding: 7px 12px;
+
+  border-radius: 20px;
+
+  background: rgba(0, 229, 195, 0.12);
+
+  border: 1px solid rgba(0, 229, 195, 0.25);
+
+  color: #00e5c3;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  letter-spacing: 0.5px;
+
+  backdrop-filter: blur(10px);
+}
+
+
+/* =========================================
+   ACTION BUTTONS
+========================================= */
+
+.project-actions {
+  position: absolute;
+
+  right: 18px;
+  bottom: 18px;
+
+  z-index: 8;
+
+  display: flex;
+  gap: 8px;
+
+  opacity: 0;
+  transform: translateY(10px);
+
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s ease;
+}
+
+.project-card:hover .project-actions {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.project-action {
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  color: #fff;
+
+  background: rgba(5, 15, 14, 0.72);
+
+  border: 1px solid rgba(255, 255, 255, 0.13);
+
+  backdrop-filter: blur(12px);
+
+  text-decoration: none;
+
+  transition:
+    background 0.3s ease,
+    border 0.3s ease;
+}
+
+.project-action:hover {
+  background: #00e5c3;
+  color: #061412;
+
+  border-color: #00e5c3;
+}
+
+
+/* =========================================
+   CONTENT
+========================================= */
+
+.project-content {
+  padding: 25px 24px 23px;
+}
+
+.project-category {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  margin-bottom: 13px;
+
+  color: #00e5c3;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+}
+
+.project-category span {
+  width: 18px;
+  height: 2px;
+
+  border-radius: 5px;
+
+  background: linear-gradient(
+    90deg,
+    #00e5c3,
+    transparent
+  );
+}
+
+.project-content h3 {
+  margin: 0 0 11px;
+
+  color: #fff;
+
+  font-size: 21px;
+  font-weight: 750;
+
+  letter-spacing: -0.3px;
+}
+
+.project-content p {
+  margin: 0;
+
+  min-height: 66px;
+
+  color: rgba(255, 255, 255, 0.52);
+
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+
+/* =========================================
+   TECH
+========================================= */
+
+.project-tech {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 7px;
+
+  margin-top: 19px;
+}
+
+.project-tech span {
+  padding: 6px 9px;
+
+  border-radius: 7px;
+
+  background: rgba(255, 255, 255, 0.045);
+
+  border: 1px solid rgba(255, 255, 255, 0.07);
+
+  color: rgba(255, 255, 255, 0.58);
+
+  font-size: 10px;
+  font-weight: 600;
+
+  transition:
+    color 0.3s ease,
+    border 0.3s ease,
+    background 0.3s ease;
+}
+
+.project-card:hover .project-tech span {
+  border-color: rgba(0, 229, 195, 0.13);
+  color: rgba(255, 255, 255, 0.78);
+}
+
+
+/* =========================================
+   CARD FOOTER
+========================================= */
+
+.project-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-top: 22px;
+  padding-top: 17px;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+
+  color: rgba(255, 255, 255, 0.38);
+
+  font-size: 11px;
+  font-weight: 600;
+
+  transition: color 0.3s ease;
+}
+
+.project-card-footer svg {
+  transition: transform 0.3s ease;
+}
+
+.project-card:hover .project-card-footer {
+  color: #00e5c3;
+}
+
+.project-card:hover .project-card-footer svg {
+  transform: translateX(5px);
+}
+
+
+/* =========================================
+   CTA
+========================================= */
+
+.projects-cta {
+  margin-top: 60px;
+
+  display: flex;
+  align-items: center;
+  gap: 18px;
+
+  padding: 24px 27px;
+
+  border-radius: 20px;
+
+  background:
+    linear-gradient(
+      100deg,
+      rgba(0, 229, 195, 0.08),
+      rgba(124, 58, 237, 0.07)
+    );
+
+  border: 1px solid rgba(255, 255, 255, 0.09);
+
+  backdrop-filter: blur(20px);
+}
+
+.projects-cta-icon {
+  width: 52px;
+  height: 52px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 15px;
+
+  background: rgba(0, 229, 195, 0.1);
+
+  border: 1px solid rgba(0, 229, 195, 0.2);
+
+  color: #00e5c3;
+}
+
+.projects-cta-text {
+  flex: 1;
+}
+
+.projects-cta-text span {
+  color: #00e5c3;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  letter-spacing: 2px;
+}
+
+.projects-cta-text p {
+  margin: 5px 0 0;
+
+  color: rgba(255, 255, 255, 0.6);
+
+  font-size: 14px;
+}
+
+.github-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 13px 18px;
+
+  border-radius: 12px;
+
+  background: #fff;
+
+  color: #07100f;
+
+  font-size: 12px;
+  font-weight: 750;
+
+  text-decoration: none;
+
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.github-btn:hover {
+  transform: translateY(-3px);
+
+  box-shadow:
+    0 12px 35px rgba(255, 255, 255, 0.12);
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 1100px) {
+  .projects-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .projects {
+    padding: 80px 0;
+  }
+
+  .projects-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .project-image {
+    height: 240px;
+  }
+
+  .project-actions {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .projects-cta {
+    flex-wrap: wrap;
+  }
+
+  .projects-cta-text {
+    min-width: 180px;
+  }
+
+  .github-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .project-filters {
+    gap: 7px;
+  }
+
+  .project-filters button {
+    padding: 9px 13px;
+    font-size: 11px;
+  }
+
+  .project-image {
+    height: 220px;
+  }
+
+  .project-content {
+    padding: 21px 19px;
+  }
+
+  .projects-cta {
+    padding: 20px;
+  }
+}
+
+
+/* ============================================================
+   PROJECT PAGINATION - FIXED ALIGNMENT
+============================================================ */
+
+.projects-pagination {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin: 50px auto 0;
+  padding: 0;
+}
+
+/* ============================================================
+   Previous / Next Buttons
+============================================================ */
+
+.pagination-btn {
+  min-width: 105px;
+  height: 44px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  padding: 0 15px;
+  margin: 0;
+
+  border: 1px solid rgba(0, 255, 200, 0.18);
+  border-radius: 10px;
+
+  background: rgba(255, 255, 255, 0.035);
+
+  color: rgba(255, 255, 255, 0.72);
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+
+  cursor: pointer;
+
+  white-space: nowrap;
+
+  transition:
+    transform 0.25s ease,
+    background 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.pagination-btn svg {
+  flex-shrink: 0;
+  display: block;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+
+  color: #ffffff;
+
+  background: rgba(0, 255, 200, 0.08);
+
+  border-color: rgba(0, 255, 200, 0.45);
+
+  box-shadow:
+    0 8px 22px rgba(0, 255, 200, 0.08);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.28;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ============================================================
+   Page Numbers
+============================================================ */
+
+.pagination-numbers {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  flex-shrink: 0;
+}
+
+.pagination-numbers button {
+  width: 44px;
+  height: 44px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+  margin: 0;
+
+  border: 1px solid rgba(0, 255, 200, 0.18);
+  border-radius: 10px;
+
+  background: rgba(255, 255, 255, 0.035);
+
+  color: rgba(255, 255, 255, 0.62);
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.25s ease,
+    background 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.pagination-numbers button:hover {
+  transform: translateY(-2px);
+
+  color: #ffffff;
+
+  background: rgba(0, 255, 200, 0.07);
+
+  border-color: rgba(0, 255, 200, 0.4);
+}
+
+.pagination-numbers button.active {
+  color: #061614;
+
+  background: #00ffc8;
+
+  border-color: #00ffc8;
+
+  box-shadow:
+    0 0 18px rgba(0, 255, 200, 0.22);
+
+  transform: translateY(-1px);
+}
+
+/* ============================================================
+   Pagination Info
+============================================================ */
+
+.pagination-info {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-top: 18px;
+
+  text-align: center;
+
+  color: rgba(255, 255, 255, 0.42);
+
+  font-size: 14px;
+  line-height: 1.5;
+
+  white-space: nowrap;
+   letter-spacing: 0.2px;
+}
+
+.pagination-info strong {
+  margin: 0 3px;
+
+  color: rgba(0, 255, 200, 0.85);
+
+  font-weight: 700;
+}
+
+/* ============================================================
+   Tablet
+============================================================ */
+
+@media (max-width: 768px) {
+
+  .projects-pagination {
+    gap: 12px;
+    margin-top: 40px;
+  }
+
+  .pagination-btn {
+    min-width: 95px;
+    height: 42px;
+  }
+
+  .pagination-numbers {
+    gap: 6px;
+  }
+
+  .pagination-numbers button {
+    width: 42px;
+    height: 42px;
+  }
+}
+
+/* ============================================================
+   Mobile
+============================================================ */
+
+@media (max-width: 560px) {
+
+  .projects-pagination {
+    gap: 8px;
+    margin-top: 35px;
+  }
+
+  .pagination-btn {
+    min-width: 42px;
+    width: 42px;
+    height: 42px;
+
+    padding: 0;
+  }
+
+  .pagination-btn span {
+    display: none;
+  }
+
+  .pagination-numbers {
+    gap: 5px;
+  }
+
+  .pagination-numbers button {
+    width: 40px;
+    height: 40px;
+  }
+
+  .pagination-info {
+    margin-top: 12px;
+    font-size: 11px;
+  }
+}
+
+/* ============================================================
+   Very Small Screens
+============================================================ */
+
+@media (max-width: 380px) {
+
+  .projects-pagination {
+    gap: 6px;
+  }
+
+  .pagination-btn {
+    width: 38px;
+    min-width: 38px;
+    height: 38px;
+  }
+
+  .pagination-numbers {
+    gap: 4px;
+  }
+
+  .pagination-numbers button {
+    width: 38px;
+    height: 38px;
+  }
+}

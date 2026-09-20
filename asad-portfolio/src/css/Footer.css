@@ -1,0 +1,809 @@
+/* =========================================
+   FOOTER MA LOGO
+========================================= */
+
+.footer-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+/* MA Monogram */
+.footer-ma-logo {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(16, 185, 129, 0.16),
+      rgba(6, 78, 59, 0.35)
+    );
+
+  border: 1px solid rgba(52, 211, 153, 0.35);
+
+  box-shadow:
+    0 0 20px rgba(16, 185, 129, 0.12),
+    inset 0 0 18px rgba(16, 185, 129, 0.05);
+
+  overflow: hidden;
+
+  transition: all 0.3s ease;
+}
+
+/* Diagonal accent */
+.footer-ma-logo::before {
+  content: "";
+  position: absolute;
+
+  width: 2px;
+  height: 65px;
+
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    #34d399,
+    transparent
+  );
+
+  transform: rotate(38deg);
+  opacity: 0.7;
+}
+
+/* M */
+.footer-ma-m {
+  position: absolute;
+
+  left: 9px;
+  top: 8px;
+
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1;
+
+  color: #34d399;
+
+  z-index: 2;
+}
+
+/* A */
+.footer-ma-a {
+  position: absolute;
+
+  right: 7px;
+  bottom: 7px;
+
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1;
+
+  color: #ffffff;
+
+  z-index: 2;
+}
+
+/* Hover */
+.footer-logo:hover .footer-ma-logo {
+  transform: translateY(-3px) rotate(-2deg);
+
+  border-color: rgba(52, 211, 153, 0.7);
+
+  box-shadow:
+    0 0 30px rgba(16, 185, 129, 0.25),
+    inset 0 0 20px rgba(16, 185, 129, 0.08);
+}
+
+/* Logo Text */
+.footer-logo-text {
+  display: flex;
+  flex-direction: column;
+
+  font-size: 17px;
+  font-weight: 800;
+
+  line-height: 1.15;
+
+  color: #ffffff;
+}
+
+.footer-logo-text span {
+  color: #34d399;
+  font-size: 15px;
+  margin-top: 2px;
+}
+
+/* =====================================================
+   PREMIUM FLOATING ACTIONS
+===================================================== */
+
+.premium-floating-actions {
+  position: fixed;
+
+  right: 24px;
+  bottom: 88px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 14px;
+
+  z-index: 9998;
+}
+
+
+/* =====================================================
+   PREMIUM BUTTON
+===================================================== */
+
+.premium-float-btn {
+  position: relative;
+
+  width: 58px;
+  height: 58px;
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 0;
+
+  background: transparent;
+
+  color: #ffffff;
+
+  text-decoration: none;
+
+  cursor: pointer;
+
+  outline: none;
+
+  isolation: isolate;
+}
+
+
+/* =====================================================
+   OUTER GLASS RING
+===================================================== */
+
+.premium-float-btn::before {
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.08);
+
+  border: 1px solid rgba(255, 255, 255, 0.20);
+
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  box-shadow:
+    0 12px 35px rgba(0, 0, 0, 0.20),
+    inset 0 1px 1px rgba(255, 255, 255, 0.25);
+
+  z-index: -2;
+}
+
+
+/* =====================================================
+   INNER BUTTON
+===================================================== */
+
+.premium-btn-inner {
+  width: 44px;
+  height: 44px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  color: #ffffff;
+
+  font-size: 20px;
+
+  position: relative;
+
+  z-index: 2;
+
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+
+.premium-float-btn:hover
+.premium-btn-inner {
+  transform: scale(1.06);
+}
+
+
+/* =====================================================
+   WHATSAPP
+===================================================== */
+
+.premium-whatsapp::before {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(37, 211, 102, 0.22),
+      rgba(10, 10, 10, 0.75)
+    );
+
+  border-color:
+    rgba(37, 211, 102, 0.45);
+}
+
+
+.premium-whatsapp .premium-btn-inner {
+  background:
+    linear-gradient(
+      145deg,
+      #25d366,
+      #128c7e
+    );
+
+  box-shadow:
+    0 8px 25px rgba(37, 211, 102, 0.38),
+    inset 0 1px 1px rgba(255, 255, 255, 0.35);
+}
+
+
+.premium-whatsapp:hover .premium-btn-inner {
+  box-shadow:
+    0 10px 35px rgba(37, 211, 102, 0.58),
+    inset 0 1px 1px rgba(255, 255, 255, 0.45);
+}
+
+
+/* =====================================================
+   CHATBOT
+===================================================== */
+
+.premium-chatbot::before {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(99, 102, 241, 0.30),
+      rgba(10, 10, 10, 0.78)
+    );
+
+  border-color:
+    rgba(99, 102, 241, 0.50);
+}
+
+
+.premium-chatbot .premium-btn-inner {
+  background:
+    linear-gradient(
+      145deg,
+      #6366f1,
+      #4338ca
+    );
+
+  box-shadow:
+    0 8px 25px rgba(79, 70, 229, 0.40),
+    inset 0 1px 1px rgba(255, 255, 255, 0.35);
+}
+
+
+.premium-chatbot:hover .premium-btn-inner {
+  box-shadow:
+    0 10px 35px rgba(79, 70, 229, 0.62),
+    inset 0 1px 1px rgba(255, 255, 255, 0.45);
+}
+
+
+/* =====================================================
+   GLOW
+===================================================== */
+
+.premium-btn-glow {
+  position: absolute;
+
+  inset: 5px;
+
+  border-radius: 50%;
+
+  opacity: 0;
+
+  pointer-events: none;
+
+  filter: blur(10px);
+
+  z-index: -1;
+
+  transition: opacity 0.3s ease;
+}
+
+
+.premium-whatsapp .premium-btn-glow {
+  background: #25d366;
+}
+
+
+.premium-chatbot .premium-btn-glow {
+  background: #6366f1;
+}
+
+
+.premium-float-btn:hover
+.premium-btn-glow {
+  opacity: 0.55;
+}
+
+
+/* =====================================================
+   PULSE RING
+===================================================== */
+
+.premium-whatsapp::after,
+.premium-chatbot::after {
+  content: "";
+
+  position: absolute;
+
+  inset: -5px;
+
+  border-radius: 50%;
+
+  pointer-events: none;
+
+  animation:
+    premiumPulse 2.8s
+    cubic-bezier(0.4, 0, 0.6, 1)
+    infinite;
+}
+
+
+.premium-whatsapp::after {
+  border: 1px solid rgba(37, 211, 102, 0.45);
+}
+
+
+.premium-chatbot::after {
+  border: 1px solid rgba(99, 102, 241, 0.45);
+}
+
+
+@keyframes premiumPulse {
+
+  0% {
+    transform: scale(0.88);
+    opacity: 0.65;
+  }
+
+  70% {
+    transform: scale(1.28);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1.28);
+    opacity: 0;
+  }
+
+}
+
+
+/* =====================================================
+   TOOLTIP
+===================================================== */
+
+.premium-float-tooltip {
+  position: absolute;
+
+  right: 70px;
+
+  top: 50%;
+
+  min-width: 118px;
+
+  padding: 10px 13px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+
+  border-radius: 12px;
+
+  background:
+    rgba(15, 15, 15, 0.92);
+
+  border:
+    1px solid rgba(255, 255, 255, 0.12);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.25);
+
+  transform:
+    translateY(-50%)
+    translateX(10px);
+
+  opacity: 0;
+  visibility: hidden;
+
+  pointer-events: none;
+
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+
+
+.premium-float-tooltip::after {
+  content: "";
+
+  position: absolute;
+
+  right: -5px;
+
+  top: 50%;
+
+  width: 9px;
+  height: 9px;
+
+  transform:
+    translateY(-50%)
+    rotate(45deg);
+
+  background: rgba(15, 15, 15, 0.92);
+
+  border-top:
+    1px solid rgba(255, 255, 255, 0.12);
+
+  border-right:
+    1px solid rgba(255, 255, 255, 0.12);
+}
+
+
+.premium-float-tooltip strong {
+  color: #ffffff;
+
+  font-size: 12px;
+
+  font-weight: 700;
+}
+
+
+.premium-float-tooltip small {
+  color: rgba(255, 255, 255, 0.55);
+
+  font-size: 9px;
+
+  font-weight: 500;
+}
+
+
+.premium-float-btn:hover
+.premium-float-tooltip {
+  opacity: 1;
+  visibility: visible;
+
+  transform:
+    translateY(-50%)
+    translateX(0);
+}
+
+
+/* =====================================================
+   LIGHT MODE
+===================================================== */
+
+[data-theme="light"]
+.premium-float-btn::before {
+  background:
+    rgba(255, 255, 255, 0.90);
+
+  border-color:
+    rgba(0, 0, 0, 0.12);
+
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.10),
+    inset 0 1px 1px rgba(255, 255, 255, 0.9);
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 768px) {
+
+  .premium-floating-actions {
+    right: 15px;
+
+    bottom: 78px;
+
+    gap: 10px;
+  }
+
+  .premium-float-btn {
+    width: 50px;
+    height: 50px;
+  }
+
+  .premium-btn-inner {
+    width: 40px;
+    height: 40px;
+
+    font-size: 18px;
+  }
+
+  .premium-float-tooltip {
+    display: none;
+  }
+
+}
+
+/* =========================================================
+   PREMIUM MESSAGE BUTTON
+========================================================= */
+
+.premium-message {
+  --message-color: #6366f1;
+  --message-color-light: #818cf8;
+  --message-rgb: 99, 102, 241;
+
+  position: relative;
+}
+
+
+/* =========================================================
+   MAIN GLOW
+========================================================= */
+
+.premium-message .premium-btn-glow {
+  position: absolute;
+  inset: -8px;
+
+  border-radius: 50%;
+
+  background: rgba(var(--message-rgb), 0.28);
+
+  filter: blur(18px);
+
+  opacity: 0.45;
+
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s ease;
+}
+
+
+/* =========================================================
+   MAIN BUTTON
+========================================================= */
+
+.premium-message .premium-btn-inner {
+  position: relative;
+  z-index: 3;
+
+  color: var(--message-color);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(99, 102, 241, 0.16),
+      rgba(129, 140, 248, 0.07)
+    );
+
+  border: 1px solid rgba(129, 140, 248, 0.3);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 8px 25px rgba(99, 102, 241, 0.14);
+
+  transition:
+    color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    background 0.3s ease;
+}
+
+
+/* =========================================================
+   ICON
+========================================================= */
+
+.premium-message .premium-btn-inner i {
+  font-size: 18px;
+
+  transition:
+    transform 0.35s ease,
+    filter 0.35s ease;
+}
+
+
+/* =========================================================
+   PULSE RING
+========================================================= */
+
+.message-pulse-ring {
+  position: absolute;
+
+  inset: 0;
+
+  border-radius: 50%;
+
+  border: 1px solid rgba(var(--message-rgb), 0.35);
+
+  opacity: 0;
+
+  pointer-events: none;
+
+  animation: messagePulse 2.8s ease-out infinite;
+}
+
+@keyframes messagePulse {
+
+  0% {
+    transform: scale(0.9);
+    opacity: 0.65;
+  }
+
+  70% {
+    transform: scale(1.45);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1.45);
+    opacity: 0;
+  }
+
+}
+
+
+/* =========================================================
+   NOTIFICATION DOT
+========================================================= */
+
+.message-notification-dot {
+  position: absolute;
+
+  top: 2px;
+  right: 2px;
+
+  width: 9px;
+  height: 9px;
+
+  border-radius: 50%;
+
+  background: #818cf8;
+
+  border: 2px solid var(--bg-primary, #0f172a);
+
+  z-index: 5;
+
+  box-shadow:
+    0 0 0 3px rgba(99, 102, 241, 0.12),
+    0 0 12px rgba(129, 140, 248, 0.7);
+
+  animation: messageDotPulse 2s ease-in-out infinite;
+}
+
+@keyframes messageDotPulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.25);
+    opacity: 0.7;
+  }
+
+}
+
+
+/* =========================================================
+   HOVER
+========================================================= */
+
+.premium-message:hover .premium-btn-glow {
+  opacity: 0.8;
+  transform: scale(1.15);
+}
+
+.premium-message:hover .premium-btn-inner {
+  color: var(--message-color-light);
+
+  border-color: rgba(129, 140, 248, 0.55);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(99, 102, 241, 0.25),
+      rgba(129, 140, 248, 0.12)
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 10px 35px rgba(99, 102, 241, 0.25);
+}
+
+.premium-message:hover .premium-btn-inner i {
+  transform: rotate(-8deg) scale(1.12);
+
+  filter:
+    drop-shadow(
+      0 0 8px rgba(129, 140, 248, 0.6)
+    );
+}
+
+
+/* =========================================================
+   TOOLTIP
+========================================================= */
+
+.premium-message .premium-float-tooltip {
+  border-color: rgba(129, 140, 248, 0.22);
+
+  box-shadow:
+    0 10px 35px rgba(0, 0, 0, 0.18);
+}
+
+
+/* =========================================================
+   LIGHT MODE
+========================================================= */
+
+[data-theme="light"] .premium-message .premium-btn-inner {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.95),
+      rgba(248, 250, 252, 0.9)
+    );
+
+  border-color: rgba(99, 102, 241, 0.2);
+
+  box-shadow:
+    0 8px 25px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+[data-theme="light"] .message-notification-dot {
+  border-color: #ffffff;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 600px) {
+
+  .premium-message .premium-btn-inner i {
+    font-size: 16px;
+  }
+
+  .message-notification-dot {
+    width: 8px;
+    height: 8px;
+  }
+
+}

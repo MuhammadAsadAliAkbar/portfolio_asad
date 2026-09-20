@@ -1,0 +1,812 @@
+/* =========================================================
+   CLIENT ACHIEVEMENTS
+   Fully Scoped Component CSS
+========================================================= */
+
+.client-achievements-section {
+  position: relative;
+  width: 100%;
+  padding: 110px 0;
+  overflow: hidden;
+}
+
+.client-achievements-container {
+  width: min(1180px, 92%);
+  margin: 0 auto;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.client-achievements-header {
+  max-width: 780px;
+  margin: 0 auto 58px;
+  text-align: center;
+}
+
+.client-achievements-mini-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 8px 14px;
+  margin-bottom: 18px;
+
+  border: 1px solid rgba(27, 89, 248, 0.28);
+  border-radius: 999px;
+
+  background: rgba(27, 89, 248, 0.06);
+
+  color: #4f8cff;
+
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.7px;
+
+  box-shadow:
+    0 0 25px rgba(27, 89, 248, 0.05);
+}
+
+.client-achievements-header h2 {
+  margin: 0;
+
+  color: #f8fafc;
+
+  font-size: clamp(34px, 4vw, 50px);
+  line-height: 1.08;
+  font-weight: 800;
+
+  letter-spacing: -1.8px;
+}
+
+.client-achievements-header h2 span {
+  display: block;
+
+  margin-top: 7px;
+
+  background: linear-gradient(
+    90deg,
+    #1b59f8,
+    #60a5fa
+  );
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.client-achievements-header p {
+  max-width: 690px;
+
+  margin: 20px auto 0;
+
+  color: #8b9bb0;
+
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+/* =========================================================
+   MAIN CARD
+========================================================= */
+
+.client-achievement-card {
+  position: relative;
+
+  display: grid;
+  grid-template-columns: 390px minmax(0, 1fr);
+
+  min-height: 535px;
+
+  overflow: hidden;
+
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 28px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(27, 89, 248, 0.055),
+      rgba(10, 17, 31, 0.96) 42%,
+      rgba(10, 17, 31, 0.99)
+    );
+
+  box-shadow:
+    0 30px 90px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+
+  transition:
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+.client-achievement-card:hover {
+  border-color: rgba(27, 89, 248, 0.3);
+
+  box-shadow:
+    0 35px 100px rgba(0, 0, 0, 0.32),
+    0 0 70px rgba(27, 89, 248, 0.055),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* Top glowing border */
+
+.client-achievement-border {
+  position: absolute;
+
+  top: 0;
+  left: 8%;
+  right: 8%;
+
+  height: 1px;
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(27, 89, 248, 0.65),
+    transparent
+  );
+
+  pointer-events: none;
+
+  z-index: 5;
+}
+
+/* =========================================================
+   LEFT VISUAL
+========================================================= */
+
+.client-achievement-visual {
+  position: relative;
+
+  min-height: 535px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  border-right: 1px solid rgba(148, 163, 184, 0.1);
+
+  background:
+    radial-gradient(
+      circle at 50% 48%,
+      rgba(27, 89, 248, 0.12),
+      transparent 58%
+    );
+}
+
+/* Grid */
+
+.client-achievement-grid {
+  position: absolute;
+  inset: 0;
+
+  opacity: 0.16;
+
+  background-image:
+    linear-gradient(
+      rgba(148, 163, 184, 0.08) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(148, 163, 184, 0.08) 1px,
+      transparent 1px
+    );
+
+  background-size: 35px 35px;
+
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    black 25%,
+    black 75%,
+    transparent
+  );
+}
+
+/* Glow */
+
+.client-achievement-glow {
+  position: absolute;
+
+  width: 300px;
+  height: 300px;
+
+  top: 50%;
+  left: 50%;
+
+  transform: translate(-50%, -50%);
+
+  border-radius: 50%;
+
+  background: rgba(27, 89, 248, 0.12);
+
+  filter: blur(70px);
+
+  pointer-events: none;
+}
+
+/* Number */
+
+.client-achievement-number {
+  position: absolute;
+
+  top: 25px;
+  right: 28px;
+
+  color: rgba(148, 163, 184, 0.16);
+
+  font-size: 13px;
+  font-weight: 800;
+
+  letter-spacing: 2px;
+}
+
+/* =========================================================
+   CALENDAR
+========================================================= */
+
+.client-calendar-icon {
+  position: relative;
+  z-index: 3;
+
+  width: 155px;
+  height: 155px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 36px;
+
+  color: #4f8cff;
+
+  border: 1px solid rgba(27, 89, 248, 0.35);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(27, 89, 248, 0.16),
+      rgba(27, 89, 248, 0.035)
+    );
+
+  box-shadow:
+    0 25px 65px rgba(0, 0, 0, 0.3),
+    0 0 45px rgba(27, 89, 248, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+  backdrop-filter: blur(15px);
+}
+
+.client-calendar-icon::before {
+  content: "";
+
+  position: absolute;
+  inset: 9px;
+
+  border-radius: 28px;
+
+  border: 1px solid rgba(96, 165, 250, 0.08);
+}
+
+.client-calendar-icon svg {
+  position: relative;
+  z-index: 2;
+}
+
+/* Small decorative dots */
+
+.client-calendar-dot {
+  position: absolute;
+
+  width: 5px;
+  height: 5px;
+
+  border-radius: 50%;
+
+  background: #1b59f8;
+
+  box-shadow:
+    0 0 12px rgba(27, 89, 248, 0.7);
+}
+
+.dot-one {
+  top: 25px;
+  right: 27px;
+}
+
+.dot-two {
+  bottom: 29px;
+  left: 27px;
+}
+
+.dot-three {
+  bottom: 28px;
+  right: 30px;
+  opacity: 0.45;
+}
+
+/* =========================================================
+   BADGE
+========================================================= */
+
+.client-achievement-badge {
+  position: absolute;
+
+  top: 27px;
+  left: 27px;
+
+  z-index: 4;
+
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  padding: 8px 12px;
+
+  border: 1px solid rgba(27, 89, 248, 0.25);
+  border-radius: 999px;
+
+  background: rgba(27, 89, 248, 0.07);
+
+  color: #60a5fa;
+
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+
+  backdrop-filter: blur(12px);
+}
+
+.client-achievement-badge svg {
+  color: #4f8cff;
+}
+
+/* =========================================================
+   FLOATING CODE CARD
+========================================================= */
+
+.client-floating-code {
+  position: absolute;
+
+  right: 22px;
+  bottom: 25px;
+
+  z-index: 4;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 11px 14px;
+
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 13px;
+
+  background: rgba(10, 17, 31, 0.72);
+
+  box-shadow:
+    0 15px 35px rgba(0, 0, 0, 0.25);
+
+  backdrop-filter: blur(15px);
+}
+
+.client-floating-code-icon {
+  width: 30px;
+  height: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 8px;
+
+  color: #4f8cff;
+
+  background: rgba(27, 89, 248, 0.1);
+}
+
+.client-floating-code small {
+  display: block;
+
+  margin-bottom: 2px;
+
+  color: #64748b;
+
+  font-size: 8px;
+  letter-spacing: 0.8px;
+}
+
+.client-floating-code strong {
+  display: block;
+
+  color: #cbd5e1;
+
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.client-achievement-content {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  padding: 48px 48px 42px;
+}
+
+/* Meta */
+
+.client-achievement-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  margin-bottom: 17px;
+
+  color: #64748b;
+
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+}
+
+.client-achievement-meta span:first-child {
+  color: #4f8cff;
+}
+
+.client-achievement-meta i {
+  width: 4px;
+  height: 4px;
+
+  border-radius: 50%;
+
+  background: #475569;
+}
+
+/* Heading */
+
+.client-achievement-content h3 {
+  margin: 0 0 20px;
+
+  color: #f8fafc;
+
+  font-size: clamp(28px, 3vw, 40px);
+  line-height: 1.1;
+  font-weight: 800;
+
+  letter-spacing: -1.3px;
+}
+
+.client-achievement-content h3 span {
+  color: #1b59f8;
+}
+
+/* Description */
+
+.client-achievement-description {
+  max-width: 730px;
+
+  margin: 0 0 12px;
+
+  color: #8b9bb0;
+
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+/* =========================================================
+   JOURNEY
+========================================================= */
+
+.client-achievement-journey {
+  position: relative;
+
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  gap: 12px;
+
+  margin-top: 25px;
+}
+
+/* Connecting line */
+
+.client-journey-line {
+  position: absolute;
+
+  top: 19px;
+  left: 20px;
+  right: 20px;
+
+  height: 1px;
+
+  background: linear-gradient(
+    90deg,
+    rgba(27, 89, 248, 0.25),
+    rgba(27, 89, 248, 0.1),
+    rgba(27, 89, 248, 0.25)
+  );
+
+  z-index: 0;
+}
+
+/* Item */
+
+.client-journey-item {
+  position: relative;
+  z-index: 2;
+
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  padding: 0 5px;
+}
+
+/* Icon */
+
+.client-journey-icon {
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 12px;
+
+  border: 1px solid rgba(27, 89, 248, 0.25);
+  border-radius: 11px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(27, 89, 248, 0.14),
+      rgba(27, 89, 248, 0.04)
+    );
+
+  color: #4f8cff;
+
+  box-shadow:
+    0 7px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Text */
+
+.client-journey-item strong {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #e2e8f0;
+
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.client-journey-item span {
+  display: block;
+
+  color: #64748b;
+
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+/* =========================================================
+   TECH STACK
+========================================================= */
+
+.client-achievement-tech {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+
+  margin-top: auto;
+  padding-top: 28px;
+}
+
+.client-achievement-tech span {
+  padding: 6px 10px;
+
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 7px;
+
+  background: rgba(255, 255, 255, 0.025);
+
+  color: #7f8ea3;
+
+  font-size: 9px;
+  font-weight: 650;
+
+  transition:
+    color 0.25s ease,
+    border-color 0.25s ease,
+    background 0.25s ease;
+}
+
+.client-achievement-tech span:hover {
+  color: #60a5fa;
+
+  border-color: rgba(27, 89, 248, 0.3);
+
+  background: rgba(27, 89, 248, 0.06);
+}
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 1050px) {
+  .client-achievement-card {
+    grid-template-columns: 320px minmax(0, 1fr);
+  }
+
+  .client-achievement-content {
+    padding: 40px 32px;
+  }
+
+  .client-achievement-journey {
+    grid-template-columns: 1fr;
+    gap: 13px;
+  }
+
+  .client-journey-line {
+    display: none;
+  }
+
+  .client-journey-item {
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr);
+
+    gap: 11px;
+  }
+
+  .client-journey-icon {
+    margin-bottom: 0;
+  }
+}
+
+/* =========================================================
+   MOBILE / TABLET
+========================================================= */
+
+@media (max-width: 800px) {
+  .client-achievements-section {
+    padding: 80px 0;
+  }
+
+  .client-achievement-card {
+    grid-template-columns: 1fr;
+  }
+
+  .client-achievement-visual {
+    min-height: 320px;
+
+    border-right: none;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  }
+
+  .client-achievement-content {
+    padding: 35px 30px;
+  }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 600px) {
+  .client-achievements-section {
+    padding: 65px 0;
+  }
+
+  .client-achievements-container {
+    width: 92%;
+  }
+
+  .client-achievements-header {
+    margin-bottom: 35px;
+  }
+
+  .client-achievements-header h2 {
+    font-size: 31px;
+    letter-spacing: -1px;
+  }
+
+  .client-achievements-header p {
+    font-size: 13px;
+  }
+
+  .client-achievement-card {
+    border-radius: 21px;
+  }
+
+  .client-achievement-visual {
+    min-height: 270px;
+  }
+
+  .client-calendar-icon {
+    width: 120px;
+    height: 120px;
+
+    border-radius: 28px;
+  }
+
+  .client-calendar-icon svg {
+    width: 48px;
+    height: 48px;
+  }
+
+  .client-achievement-badge {
+    top: 18px;
+    left: 18px;
+  }
+
+  .client-floating-code {
+    right: 17px;
+    bottom: 18px;
+  }
+
+  .client-achievement-content {
+    padding: 28px 21px 25px;
+  }
+
+  .client-achievement-content h3 {
+    font-size: 27px;
+  }
+
+  .client-achievement-description {
+    font-size: 12.5px;
+  }
+
+  .client-achievement-journey {
+    margin-top: 20px;
+  }
+
+  .client-achievement-tech {
+    padding-top: 22px;
+  }
+}
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 380px) {
+  .client-achievements-header h2 {
+    font-size: 27px;
+  }
+
+  .client-achievement-visual {
+    min-height: 240px;
+  }
+
+  .client-achievement-content {
+    padding: 25px 18px;
+  }
+
+  .client-achievement-content h3 {
+    font-size: 24px;
+  }
+
+  .client-floating-code {
+    padding: 9px 11px;
+  }
+
+  .client-floating-code strong {
+    font-size: 9px;
+  }
+}
