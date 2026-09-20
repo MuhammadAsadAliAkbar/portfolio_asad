@@ -1,59 +1,218 @@
-import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
+import {
+  motion,
+  AnimatePresence,
+} from "framer-motion";
+
 import Pusher from "pusher-js";
+
 import notificationSound from "../assets/notification.mp3";
+
 import "../css/Chatbot.css";
 
-const API_URL =
-  import.meta.env.VITE_API_URL || "https://your-api-url.com";
+/* =========================================================
+   CONFIG
+========================================================= */
 
-const PUSHER_KEY = import.meta.env.VITE_PUSHER_KEY;
-const PUSHER_CLUSTER = import.meta.env.VITE_PUSHER_CLUSTER || "ap2";
+const API_URL =
+  import.meta.env.VITE_API_URL;
+
+const PUSHER_KEY =
+  import.meta.env.VITE_PUSHER_KEY;
+
+const PUSHER_CLUSTER =
+  import.meta.env.VITE_PUSHER_CLUSTER ||
+  "ap2";
+
+/* =========================================================
+   QUICK QUESTIONS
+========================================================= */
+
+const quickQuestions = [
+  "Tell me about yourself",
+  "What are your skills?",
+  "Show me your projects",
+  "How can I contact you?",
+];
+
+/* =========================================================
+   FALLBACK RESPONSE
+========================================================= */
+
+const getBotReply = (message) => {
+  const text = message.toLowerCase();
+
+  if (
+    text.includes("hello") ||
+    text.includes("hi") ||
+    text.includes("hey") ||
+    text.includes("salam") ||
+    text.includes("assalam")
+  ) {
+    return (
+      "Hi! 👋 Welcome to Muhammad Asad Ali Akbar's portfolio. How can I help you?"
+    );
+  }
+
+  if (
+    text.includes("yourself") ||
+    text.includes("about")
+  ) {
+    return (
+      "I'm Muhammad Asad Ali Akbar, a Senior Full Stack / MERN Stack Developer with 5+ years of professional experience building scalable, secure and high-performance web applications."
+    );
+  }
+
+  if (
+    text.includes("skill") ||
+    text.includes("technology") ||
+    text.includes("stack")
+  ) {
+    return (
+      "My core technologies include React.js, Next.js, Angular, TypeScript, Node.js, Express.js, NestJS, MongoDB, MySQL, PostgreSQL, Redis, Docker, AWS, Kafka, RabbitMQ, Elasticsearch and REST/gRPC APIs. I also work with AI technologies including OpenAI, Gemini, LangChain, LangGraph, RAG and AI Agents."
+    );
+  }
+
+  if (
+    text.includes("project") ||
+    text.includes("work")
+  ) {
+    return (
+      "I've worked on enterprise dashboards, SaaS platforms, REST APIs, real-time applications, scalable backend systems, AI-powered applications and cloud-based solutions."
+    );
+  }
+
+  if (
+    text.includes("experience") ||
+    text.includes("5 years")
+  ) {
+    return (
+      "I have 5+ years of professional experience in full-stack development, working across frontend, backend, databases, APIs, cloud deployment, performance optimization and scalable software architecture."
+    );
+  }
+
+  if (
+    text.includes("contact") ||
+    text.includes("hire") ||
+    text.includes("email")
+  ) {
+    return (
+      "You can contact me through email at crypton.futuremedia1989@gmail.com or connect with me on LinkedIn. You can also send me a message directly on WhatsApp."
+    );
+  }
+
+  if (
+    text.includes("whatsapp") ||
+    text.includes("message")
+  ) {
+    return (
+      "Sure! You can contact me directly on WhatsApp using the button below."
+    );
+  }
+
+  if (text.includes("github")) {
+    return (
+      "You can explore my GitHub projects here: github.com/cryptonfuture"
+    );
+  }
+
+  if (text.includes("linkedin")) {
+    return (
+      "You can connect with me on LinkedIn through my portfolio's LinkedIn link."
+    );
+  }
+
+  return (
+    "Thanks for your message! 😊 You can ask me about my experience, skills, projects, technologies or contact information."
+  );
+};
+
+/* =========================================================
+   COMPONENT
+========================================================= */
 
 function Chatbot() {
-  /* =========================================================
-     STATE
-  ========================================================= */
+  /* =======================================================
+     CHATBOT OPEN / CLOSE
+  ======================================================= */
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState([]);
-  const [isTyping, setIsTyping] = useState(false);
-  const [notificationCount, setNotificationCount] = useState(0);
+  const [isOpen, setIsOpen] =
+    useState(false);
 
-  /* =========================================================
+  /* =======================================================
+     MESSAGES
+  ======================================================= */
+
+  const [messages, setMessages] =
+    useState([
+      {
+        id: 1,
+        sender: "bot",
+        text:
+          "Hi! 👋 I'm Asad's virtual assistant. How can I help you today?",
+      },
+    ]);
+
+  /* =======================================================
+     INPUT
+  ======================================================= */
+
+  const [input, setInput] =
+    useState("");
+
+  /* =======================================================
+     TYPING
+  ======================================================= */
+
+  const [isTyping, setIsTyping] =
+    useState(false);
+
+  /* =======================================================
+     PUSHER STATUS
+  ======================================================= */
+
+  const [
+    isPusherConnected,
+    setIsPusherConnected,
+  ] = useState(false);
+
+  /* =======================================================
+     NOTIFICATION COUNT
+  ======================================================= */
+
+  const [
+    notificationCount,
+    setNotificationCount,
+  ] = useState(0);
+
+  /* =======================================================
      REFS
-  ========================================================= */
+  ======================================================= */
 
-  const isOpenRef = useRef(false);
-  const notificationAudioRef = useRef(null);
-  const messagesEndRef = useRef(null);
+  const pusherRef =
+    useRef(null);
 
-  /* =========================================================
-     SYNC OPEN STATE
-  ========================================================= */
+  const channelRef =
+    useRef(null);
 
-  useEffect(() => {
-    isOpenRef.current = isOpen;
+  const messagesEndRef =
+    useRef(null);
 
-    if (isOpen) {
-      setNotificationCount(0);
-    }
-  }, [isOpen]);
+  const isOpenRef =
+    useRef(false);
 
-  /* =========================================================
-     AUTO SCROLL
-  ========================================================= */
+  const notificationAudioRef =
+    useRef(null);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: "smooth",
-    });
-  }, [messages, isTyping]);
-
-  /* =========================================================
-     AUDIO INITIALIZATION
-  ========================================================= */
+  /* =======================================================
+     CREATE + UNLOCK NOTIFICATION AUDIO
+  ======================================================= */
 
   useEffect(() => {
     let audio;
@@ -66,8 +225,17 @@ function Chatbot() {
 
       notificationAudioRef.current = audio;
 
+      /*
+        Browser autoplay policy:
+
+        Audio ko first user interaction par unlock
+        kiya jata hai. Iske baad Pusher events se
+        notification sound play ho sakta hai.
+      */
+
       const unlockAudio = async () => {
-        const notificationAudio = notificationAudioRef.current;
+        const notificationAudio =
+          notificationAudioRef.current;
 
         if (!notificationAudio) {
           return;
@@ -83,10 +251,32 @@ function Chatbot() {
           notificationAudio.currentTime = 0;
           notificationAudio.muted = false;
 
-          console.log("🔊 Notification audio unlocked");
+          console.log(
+            "🔊 Notification sound unlocked"
+          );
+
+          window.removeEventListener(
+            "click",
+            unlockAudio
+          );
+
+          window.removeEventListener(
+            "pointerdown",
+            unlockAudio
+          );
+
+          window.removeEventListener(
+            "keydown",
+            unlockAudio
+          );
+
+          window.removeEventListener(
+            "touchstart",
+            unlockAudio
+          );
         } catch (error) {
           console.warn(
-            "Audio unlock failed:",
+            "⚠️ Notification sound waiting for user interaction:",
             error
           );
         }
@@ -139,429 +329,853 @@ function Chatbot() {
 
         if (audio) {
           audio.pause();
-          audio.src = "";
+          audio.currentTime = 0;
         }
+
+        notificationAudioRef.current =
+          null;
       };
     } catch (error) {
       console.error(
-        "Notification audio initialization failed:",
+        "❌ Notification audio initialization error:",
         error
       );
     }
   }, []);
 
-  /* =========================================================
+  /* =======================================================
      PLAY NOTIFICATION SOUND
-  ========================================================= */
+  ======================================================= */
 
-  const playNotificationSound = async () => {
-    try {
-      const audio = notificationAudioRef.current;
+  const playNotificationSound =
+    async () => {
+      try {
+        const audio =
+          notificationAudioRef.current;
 
-      if (!audio) {
+        if (!audio) {
+          console.warn(
+            "⚠️ Notification audio is not initialized"
+          );
+
+          return;
+        }
+
+        audio.pause();
+
+        audio.currentTime = 0;
+
+        audio.volume = 0.65;
+
+        audio.muted = false;
+
+        await audio.play();
+
+        console.log(
+          "🔊 Notification sound played"
+        );
+      } catch (error) {
+        console.warn(
+          "⚠️ Notification sound could not be played:",
+          error
+        );
+      }
+    };
+
+  /* =======================================================
+     SHOW NOTIFICATION
+  ======================================================= */
+
+  const showNotification =
+    () => {
+      /*
+        Chatbot open hai to notification badge
+        aur sound nahi dena.
+      */
+
+      if (isOpenRef.current) {
         return;
       }
 
-      audio.pause();
-      audio.currentTime = 0;
-      audio.volume = 0.65;
-      audio.muted = false;
-
-      await audio.play();
-    } catch (error) {
-      console.warn(
-        "Notification sound could not play:",
-        error
-      );
-    }
-  };
-
-  /* =========================================================
-     SHOW NOTIFICATION
-  ========================================================= */
-
-  const showNotification = () => {
-    /*
-      Do not show notification while chatbot is already open.
-    */
-
-    if (isOpenRef.current) {
-      return;
-    }
-
-    setNotificationCount((previousCount) => {
-      const newCount = previousCount + 1;
-
-      console.log(
-        "🔔 Notification Count:",
-        newCount
+      setNotificationCount(
+        (prev) => prev + 1
       );
 
-      return newCount;
-    });
+      playNotificationSound();
+    };
 
-    playNotificationSound();
-  };
+  /* =======================================================
+     KEEP OPEN STATE IN REF
+  ======================================================= */
 
-  /* =========================================================
-     OPEN CHATBOT
-  ========================================================= */
-
-  const openChatbot = () => {
-    setIsOpen(true);
+  useEffect(() => {
+    isOpenRef.current =
+      isOpen;
 
     /*
-      Reset badge immediately.
+      Chatbot open karte hi notifications
+      clear kar dein.
     */
 
-    setNotificationCount(0);
+    if (isOpen) {
+      setNotificationCount(0);
+    }
+  }, [isOpen]);
 
-    /*
-      Update ref immediately.
-      This avoids stale state issues with Pusher events.
-    */
+  /* =======================================================
+     EXTERNAL OPEN CHATBOT EVENT
+  ======================================================= */
 
-    isOpenRef.current = true;
-  };
+  useEffect(() => {
+    const handleOpenChatbot =
+      () => {
+        setIsOpen(true);
 
-  /* =========================================================
-     CLOSE CHATBOT
-  ========================================================= */
+        setNotificationCount(0);
+      };
 
-  const closeChatbot = () => {
-    setIsOpen(false);
+    window.addEventListener(
+      "open-chatbot",
+      handleOpenChatbot
+    );
 
-    isOpenRef.current = false;
-  };
+    return () => {
+      window.removeEventListener(
+        "open-chatbot",
+        handleOpenChatbot
+      );
+    };
+  }, []);
 
-  /* =========================================================
-     PUSHER
-  ========================================================= */
+  /* =======================================================
+     PUSHER CONNECTION
+  ======================================================= */
 
   useEffect(() => {
     if (!PUSHER_KEY) {
       console.warn(
-        "VITE_PUSHER_KEY is not configured."
+        "⚠️ Pusher key missing. Add VITE_PUSHER_KEY to .env"
       );
 
       return;
     }
 
-    let pusher;
-    let channel;
+    /* -----------------------------------------------------
+       CREATE PUSHER
+    ----------------------------------------------------- */
 
-    try {
-      pusher = new Pusher(PUSHER_KEY, {
-        cluster: PUSHER_CLUSTER,
-        forceTLS: true,
-      });
+    const pusher =
+      new Pusher(
+        PUSHER_KEY,
+        {
+          cluster:
+            PUSHER_CLUSTER,
 
-      channel = pusher.subscribe(
-        "portfolio-channel"
-      );
-
-      /* =====================================================
-         PORTFOLIO UPDATE
-      ===================================================== */
-
-      channel.bind(
-        "portfolio-update",
-        (data) => {
-          console.log(
-            "📢 Portfolio Update:",
-            data
-          );
-
-          showNotification();
-
-          if (data?.message) {
-            setMessages((previousMessages) => [
-              ...previousMessages,
-              {
-                id: Date.now(),
-                sender: "system",
-                text: data.message,
-              },
-            ]);
-          }
+          forceTLS:
+            true,
         }
       );
 
-      /* =====================================================
-         CLIENT MESSAGE
-      ===================================================== */
+    pusherRef.current =
+      pusher;
 
-      channel.bind(
-        "client-message",
-        (data) => {
-          console.log(
-            "💬 Client Message:",
-            data
-          );
+    /* =====================================================
+       CONNECTED
+    ===================================================== */
 
-          showNotification();
+    const onConnected =
+      () => {
+        console.log(
+          "✅ Pusher connected"
+        );
 
-          if (data?.message) {
-            setMessages((previousMessages) => [
-              ...previousMessages,
-              {
-                id: Date.now(),
-                sender: "client",
-                text: data.message,
-              },
-            ]);
-          }
+        setIsPusherConnected(
+          true
+        );
+      };
+
+    /* =====================================================
+       DISCONNECTED
+    ===================================================== */
+
+    const onDisconnected =
+      () => {
+        console.log(
+          "⚠️ Pusher disconnected"
+        );
+
+        setIsPusherConnected(
+          false
+        );
+      };
+
+    /* =====================================================
+       ERROR
+    ===================================================== */
+
+    const onError =
+      (error) => {
+        console.error(
+          "❌ Pusher error:",
+          error
+        );
+
+        setIsPusherConnected(
+          false
+        );
+      };
+
+    pusher.connection.bind(
+      "connected",
+      onConnected
+    );
+
+    pusher.connection.bind(
+      "disconnected",
+      onDisconnected
+    );
+
+    pusher.connection.bind(
+      "error",
+      onError
+    );
+
+    /* =====================================================
+       SUBSCRIBE
+    ===================================================== */
+
+    const channel =
+      pusher.subscribe(
+        "portfolio-updates"
+      );
+
+    channelRef.current =
+      channel;
+
+    /* =====================================================
+       PORTFOLIO UPDATE
+    ===================================================== */
+
+    channel.bind(
+      "portfolio-update",
+      (data) => {
+        console.log(
+          "🔔 Portfolio update received:",
+          data
+        );
+
+        const title =
+          data?.title ||
+          "Portfolio Update";
+
+        const updateMessage =
+          data?.message ||
+          "A new portfolio update is available.";
+
+        setMessages(
+          (prev) => [
+            ...prev,
+            {
+              id:
+                Date.now() +
+                Math.random(),
+
+              sender:
+                "bot",
+
+              text:
+                `🔔 ${title}\n\n${updateMessage}`,
+            },
+          ]
+        );
+
+        /*
+          Notification only when chatbot is closed.
+        */
+
+        showNotification();
+      }
+    );
+
+    /* =====================================================
+       CLIENT MESSAGE
+    ===================================================== */
+
+    channel.bind(
+      "client-message",
+      (data) => {
+        console.log(
+          "💬 New client message received:",
+          data
+        );
+
+        if (!data?.message) {
+          return;
         }
-      );
 
-      /* =====================================================
-         CHATBOT MESSAGE
-      ===================================================== */
+        /*
+          Count + sound when chatbot closed.
+        */
 
-      channel.bind(
-        "chatbot-message",
-        (data) => {
-          console.log(
-            "🤖 Chatbot Message:",
-            data
-          );
+        showNotification();
+      }
+    );
 
-          showNotification();
+    /* =====================================================
+       GENERAL CHATBOT MESSAGE
+    ===================================================== */
 
-          if (data?.message) {
-            setMessages((previousMessages) => [
-              ...previousMessages,
-              {
-                id: Date.now(),
-                sender: "bot",
-                text: data.message,
-              },
-            ]);
-          }
+    channel.bind(
+      "chatbot-message",
+      (data) => {
+        console.log(
+          "💬 Chatbot message received:",
+          data
+        );
+
+        if (!data?.message) {
+          return;
         }
-      );
 
-      /* =====================================================
-         AI RESPONSE
-      ===================================================== */
+        setMessages(
+          (prev) => [
+            ...prev,
+            {
+              id:
+                Date.now() +
+                Math.random(),
 
-      channel.bind(
-        "ai-response",
-        (data) => {
-          console.log(
-            "🧠 AI Response:",
-            data
-          );
+              sender:
+                data.sender ===
+                "user"
+                  ? "user"
+                  : "bot",
 
-          showNotification();
+              text:
+                data.message,
+            },
+          ]
+        );
 
-          if (data?.message) {
-            setMessages((previousMessages) => [
-              ...previousMessages,
-              {
-                id: Date.now(),
-                sender: "bot",
-                text: data.message,
-              },
-            ]);
-          }
+        /*
+          Count + sound when chatbot closed.
+        */
+
+        showNotification();
+      }
+    );
+
+    /* =====================================================
+       AI RESPONSE
+    ===================================================== */
+
+    channel.bind(
+      "ai-response",
+      (data) => {
+        console.log(
+          "🤖 AI response received:",
+          data
+        );
+
+        if (!data?.reply) {
+          return;
         }
-      );
 
-      /* =====================================================
-         CONNECTION EVENTS
-      ===================================================== */
+        setIsTyping(false);
 
-      pusher.connection.bind(
-        "connected",
-        () => {
-          console.log(
-            "🟢 Pusher connected"
-          );
-        }
-      );
+        setMessages(
+          (prev) => [
+            ...prev,
+            {
+              id:
+                Date.now() +
+                Math.random(),
 
-      pusher.connection.bind(
-        "error",
-        (error) => {
-          console.error(
-            "🔴 Pusher connection error:",
-            error
-          );
-        }
-      );
-    } catch (error) {
-      console.error(
-        "Pusher initialization failed:",
-        error
-      );
-    }
+              sender:
+                "bot",
 
-    /* =======================================================
-       CLEANUP
-    ======================================================= */
+              text:
+                data.reply,
+            },
+          ]
+        );
 
-    return () => {
-      if (channel) {
-        channel.unbind_all();
+        /*
+          AI response bhi notification generate karega
+          jab chatbot closed ho.
+        */
 
-        pusher?.unsubscribe(
-          "portfolio-channel"
+        showNotification();
+      }
+    );
+
+    /* =====================================================
+       SUBSCRIPTION ERROR
+    ===================================================== */
+
+    channel.bind(
+      "pusher:subscription_error",
+      (error) => {
+        console.error(
+          "❌ Pusher subscription error:",
+          error
         );
       }
+    );
 
-      if (pusher) {
-        pusher.disconnect();
-      }
+    /* =====================================================
+       CLEANUP
+    ===================================================== */
+
+    return () => {
+      channel.unbind_all();
+
+      pusher.unsubscribe(
+        "portfolio-updates"
+      );
+
+      pusher.connection.unbind(
+        "connected",
+        onConnected
+      );
+
+      pusher.connection.unbind(
+        "disconnected",
+        onDisconnected
+      );
+
+      pusher.connection.unbind(
+        "error",
+        onError
+      );
+
+      pusher.disconnect();
+
+      pusherRef.current =
+        null;
+
+      channelRef.current =
+        null;
     };
   }, []);
 
-  /* =========================================================
-     SEND MESSAGE
-  ========================================================= */
+  /* =======================================================
+     AUTO SCROLL
+  ======================================================= */
 
-  const sendMessage = async () => {
-    const trimmedMessage = message.trim();
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView(
+      {
+        behavior:
+          "smooth",
+      }
+    );
+  }, [
+    messages,
+    isTyping,
+  ]);
 
-    if (!trimmedMessage || isTyping) {
-      return;
-    }
+  /* =======================================================
+     PORTFOLIO UPDATE API
+  ======================================================= */
 
-    const userMessage = {
-      id: Date.now(),
-      sender: "user",
-      text: trimmedMessage,
+  const sendPortfolioUpdate =
+    async ({
+      title = "Portfolio Update",
+      message,
+      type = "portfolio",
+    }) => {
+      try {
+        if (!message?.trim()) {
+          console.warn(
+            "Portfolio update message is required."
+          );
+
+          return null;
+        }
+
+        const response =
+          await fetch(
+            `${API_URL}/api/portfolio/update`,
+            {
+              method:
+                "POST",
+
+              headers: {
+                "Content-Type":
+                  "application/json",
+              },
+
+              body:
+                JSON.stringify({
+                  title,
+                  message,
+                  type,
+                }),
+            }
+          );
+
+        const data =
+          await response.json();
+
+        if (
+          !response.ok ||
+          !data?.success
+        ) {
+          throw new Error(
+            data?.message ||
+              `Portfolio update failed: ${response.status}`
+          );
+        }
+
+        console.log(
+          "🔔 Portfolio update sent:",
+          data
+        );
+
+        return data;
+      } catch (error) {
+        console.error(
+          "❌ Portfolio update API error:",
+          error
+        );
+
+        return null;
+      }
     };
 
-    setMessages((previousMessages) => [
-      ...previousMessages,
-      userMessage,
-    ]);
+  /* =======================================================
+     CHATBOT BROADCAST API
+  ======================================================= */
 
-    setMessage("");
-    setIsTyping(true);
+  const broadcastChatbotMessage =
+    async ({
+      message,
+      sender = "bot",
+    }) => {
+      try {
+        if (!message?.trim()) {
+          console.warn(
+            "Chatbot broadcast message is required."
+          );
 
-    try {
-      /*
-        Change this endpoint according to your backend.
-      */
-
-      const response = await fetch(
-        `${API_URL}/api/chat`,
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-
-          body: JSON.stringify({
-            message: trimmedMessage,
-          }),
+          return null;
         }
-      );
 
-      if (!response.ok) {
-        throw new Error(
-          `HTTP Error: ${response.status}`
+        const response =
+          await fetch(
+            `${API_URL}/api/chatbot/broadcast`,
+            {
+              method:
+                "POST",
+
+              headers: {
+                "Content-Type":
+                  "application/json",
+              },
+
+              body:
+                JSON.stringify({
+                  message,
+                  sender,
+                }),
+            }
+          );
+
+        const data =
+          await response.json();
+
+        if (
+          !response.ok ||
+          !data?.success
+        ) {
+          throw new Error(
+            data?.message ||
+              `Chatbot broadcast failed: ${response.status}`
+          );
+        }
+
+        console.log(
+          "💬 Chatbot broadcast sent:",
+          data
         );
+
+        return data;
+      } catch (error) {
+        console.error(
+          "❌ Chatbot broadcast API error:",
+          error
+        );
+
+        return null;
+      }
+    };
+
+  /* =======================================================
+     SEND MESSAGE
+  ======================================================= */
+
+  const sendMessage =
+    async (
+      messageText = input
+    ) => {
+      const message =
+        messageText.trim();
+
+      if (
+        !message ||
+        isTyping
+      ) {
+        return;
       }
 
-      const data = await response.json();
+      /* ---------------------------------------------------
+         ADD USER MESSAGE
+      --------------------------------------------------- */
 
-      const botResponse =
-        data?.response ||
-        data?.message ||
-        data?.answer ||
-        "Sorry, I couldn't process your request.";
+      setMessages(
+        (prev) => [
+          ...prev,
+          {
+            id:
+              Date.now(),
 
-      setMessages((previousMessages) => [
-        ...previousMessages,
-        {
-          id: Date.now() + 1,
-          sender: "bot",
-          text: botResponse,
-        },
-      ]);
-    } catch (error) {
-      console.error(
-        "Chat API Error:",
-        error
+            sender:
+              "user",
+
+            text:
+              message,
+          },
+        ]
       );
 
-      setMessages((previousMessages) => [
-        ...previousMessages,
-        {
-          id: Date.now() + 1,
-          sender: "bot",
-          text:
-            "Sorry, something went wrong. Please try again or contact me directly.",
-        },
-      ]);
-    } finally {
-      setIsTyping(false);
-    }
-  };
+      setInput("");
 
-  /* =========================================================
-     ENTER KEY
-  ========================================================= */
-
-  const handleKeyDown = (event) => {
-    if (
-      event.key === "Enter" &&
-      !event.shiftKey
-    ) {
-      event.preventDefault();
-
-      sendMessage();
-    }
-  };
-
-  /* =========================================================
-     QUICK QUESTIONS
-  ========================================================= */
-
-  const quickQuestions = [
-    "Tell me about your experience",
-    "What technologies do you use?",
-    "Show me your projects",
-    "How can I contact you?",
-  ];
-
-  const handleQuickQuestion = (
-    question
-  ) => {
-    setMessage(question);
-  };
-
-  /* =========================================================
-     WHATSAPP
-  ========================================================= */
-
-  const openWhatsApp = () => {
-    const whatsappMessage =
-      encodeURIComponent(
-        "Hello Muhammad, I would like to discuss a project with you."
+      setIsTyping(
+        true
       );
 
-    window.open(
-      `https://wa.me/?text=${whatsappMessage}`,
-      "_blank",
-      "noopener,noreferrer"
-    );
-  };
+      /* ---------------------------------------------------
+         API REQUEST
+      --------------------------------------------------- */
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
+      try {
+        const response =
+          await fetch(
+            `${API_URL}/api/chat`,
+            {
+              method:
+                "POST",
+
+              headers: {
+                "Content-Type":
+                  "application/json",
+              },
+
+              body:
+                JSON.stringify({
+                  message,
+                }),
+            }
+          );
+
+        if (!response.ok) {
+          throw new Error(
+            `Chat API failed: ${response.status}`
+          );
+        }
+
+        const data =
+          await response.json();
+
+        /* -------------------------------------------------
+           DIRECT RESPONSE
+        -------------------------------------------------
+
+          Backend already sends ai-response
+          through Pusher.
+
+          If Pusher is unavailable,
+          use direct API response.
+        */
+
+        if (
+          !isPusherConnected &&
+          data?.reply
+        ) {
+          setIsTyping(false);
+
+          setMessages(
+            (prev) => [
+              ...prev,
+              {
+                id:
+                  Date.now() +
+                  Math.random(),
+
+                sender:
+                  "bot",
+
+                text:
+                  data.reply,
+              },
+            ]
+          );
+        }
+      } catch (error) {
+        console.error(
+          "❌ Chat API error:",
+          error
+        );
+
+        /* -------------------------------------------------
+           LOCAL FALLBACK
+        ------------------------------------------------- */
+
+        setTimeout(
+          () => {
+            setIsTyping(
+              false
+            );
+
+            setMessages(
+              (prev) => [
+                ...prev,
+                {
+                  id:
+                    Date.now() +
+                    Math.random(),
+
+                  sender:
+                    "bot",
+
+                  text:
+                    getBotReply(
+                      message
+                    ),
+                },
+              ]
+            );
+          },
+          700
+        );
+      }
+    };
+
+  /* =======================================================
+     KEYBOARD
+  ======================================================= */
+
+  const handleKeyDown =
+    (event) => {
+      if (
+        event.key === "Enter" &&
+        !event.shiftKey
+      ) {
+        event.preventDefault();
+
+        sendMessage();
+      }
+    };
+
+  /* =======================================================
+     OPEN CHATBOT
+  ======================================================= */
+
+  const openChatbot =
+    () => {
+      setIsOpen(
+        true
+      );
+
+      setNotificationCount(
+        0
+      );
+    };
+
+  /* =======================================================
+     CLOSE CHATBOT
+  ======================================================= */
+
+  const closeChatbot =
+    () => {
+      setIsOpen(
+        false
+      );
+    };
+
+  /* =======================================================
+     UI
+  ======================================================= */
 
   return (
     <>
-      {/* =====================================================
-          CHATBOT WINDOW
-      ===================================================== */}
+      {/* ===================================================
+          FLOATING CHATBOT BUTTON
+      =================================================== */}
+
+      <motion.button
+        type="button"
+        className="chatbot-toggle"
+        onClick={
+          openChatbot
+        }
+        aria-label="Open chatbot"
+        whileHover={{
+          scale:
+            1.05,
+        }}
+        whileTap={{
+          scale:
+            0.95,
+        }}
+      >
+        <i className="fas fa-robot"></i>
+
+        {/* =================================================
+            NOTIFICATION BADGE
+        ================================================= */}
+
+        <AnimatePresence>
+          {notificationCount >
+            0 && (
+            <motion.span
+              className="chatbot-notification"
+              initial={{
+                scale: 0,
+                opacity: 0,
+              }}
+              animate={{
+                scale: 1,
+                opacity: 1,
+              }}
+              exit={{
+                scale: 0,
+                opacity: 0,
+              }}
+              transition={{
+                type:
+                  "spring",
+
+                stiffness:
+                  500,
+
+                damping:
+                  20,
+              }}
+            >
+              {notificationCount >
+              99
+                ? "99+"
+                : notificationCount}
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </motion.button>
+
+      {/* ===================================================
+          CHAT WINDOW
+      =================================================== */}
 
       <AnimatePresence>
         {isOpen && (
@@ -569,7 +1183,7 @@ function Chatbot() {
             className="chatbot-window"
             initial={{
               opacity: 0,
-              scale: 0.85,
+              scale: 0.88,
               y: 30,
             }}
             animate={{
@@ -579,12 +1193,19 @@ function Chatbot() {
             }}
             exit={{
               opacity: 0,
-              scale: 0.85,
+              scale: 0.88,
               y: 30,
             }}
             transition={{
-              duration: 0.25,
-              ease: "easeOut",
+              duration:
+                0.3,
+
+              ease: [
+                0.22,
+                1,
+                0.36,
+                1,
+              ],
             }}
           >
             {/* =================================================
@@ -592,17 +1213,46 @@ function Chatbot() {
             ================================================= */}
 
             <div className="chatbot-header">
-              <div className="chatbot-header-info">
-                <div className="chatbot-avatar">
-                  <i className="fas fa-robot"></i>
+              <div className="chatbot-profile">
+                <div className="chatbot-avatar-wrap">
+                  <div className="chatbot-avatar">
+                    <i className="fas fa-robot"></i>
+                  </div>
+
+                  <span
+                    className={`chatbot-online ${
+                      isPusherConnected
+                        ? "connected"
+                        : "disconnected"
+                    }`}
+                  />
                 </div>
 
-                <div>
-                  <h3>AI Assistant</h3>
+                <div className="chatbot-profile-info">
+                  <div className="chatbot-title-row">
+                    <h3>
+                      Asad's Assistant
+                    </h3>
 
-                  <span>
-                    <span className="online-dot"></span>
-                    Online
+                    <span className="ai-badge">
+                      AI
+                    </span>
+                  </div>
+
+                  <span className="chatbot-status">
+                    <i
+                      className="fas fa-circle"
+                      style={{
+                        color:
+                          isPusherConnected
+                            ? "#22c55e"
+                            : "#f59e0b",
+                      }}
+                    />
+
+                    {isPusherConnected
+                      ? "Live & ready to help"
+                      : "Connecting..."}
                   </span>
                 </div>
               </div>
@@ -610,7 +1260,9 @@ function Chatbot() {
               <button
                 type="button"
                 className="chatbot-close"
-                onClick={closeChatbot}
+                onClick={
+                  closeChatbot
+                }
                 aria-label="Close chatbot"
               >
                 <i className="fas fa-times"></i>
@@ -618,195 +1270,261 @@ function Chatbot() {
             </div>
 
             {/* =================================================
-                MESSAGES
+                BODY
             ================================================= */}
 
-            <div className="chatbot-messages">
-              {messages.length === 0 && (
-                <div className="chatbot-welcome">
-                  <div className="welcome-icon">
-                    <i className="fas fa-robot"></i>
-                  </div>
+            <div className="chatbot-body">
+              {/* =================================================
+                  WELCOME
+              ================================================= */}
 
-                  <h3>
-                    Hi! I'm your AI Assistant 👋
-                  </h3>
+              <div className="chatbot-welcome">
+                <div className="welcome-icon">
+                  <i className="fas fa-sparkles"></i>
+                </div>
+
+                <div>
+                  <h4>
+                    How can I help?
+                  </h4>
 
                   <p>
-                    Ask me anything about my
-                    experience, skills, projects,
-                    or services.
+                    Ask me about Asad's
+                    experience, skills,
+                    projects or contact
+                    details.
                   </p>
+                </div>
+              </div>
 
-                  {/* ===========================================
-                      QUICK QUESTIONS
-                  =========================================== */}
+              {/* =================================================
+                  MESSAGES
+              ================================================= */}
 
-                  <div className="quick-questions">
+              <div className="chatbot-messages">
+                {messages.map(
+                  (message) => (
+                    <motion.div
+                      key={
+                        message.id
+                      }
+                      className={`chat-message ${
+                        message.sender ===
+                        "user"
+                          ? "user-message"
+                          : "bot-message"
+                      }`}
+                      initial={{
+                        opacity: 0,
+                        y: 10,
+                        scale: 0.97,
+                      }}
+                      animate={{
+                        opacity: 1,
+                        y: 0,
+                        scale: 1,
+                      }}
+                      transition={{
+                        duration:
+                          0.25,
+                      }}
+                    >
+                      {message.sender ===
+                        "bot" && (
+                        <div className="message-avatar">
+                          <i className="fas fa-robot"></i>
+                        </div>
+                      )}
+
+                      <div className="message-bubble">
+                        <div className="message-content">
+                          {message.text}
+                        </div>
+
+                        <span className="message-time">
+                          {message.sender ===
+                          "user"
+                            ? "You"
+                            : "Assistant"}
+                        </span>
+                      </div>
+                    </motion.div>
+                  )
+                )}
+
+                {/* =================================================
+                    TYPING
+                ================================================= */}
+
+                {isTyping && (
+                  <motion.div
+                    className="chat-message bot-message"
+                    initial={{
+                      opacity: 0,
+                      y: 8,
+                    }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                    }}
+                  >
+                    <div className="message-avatar">
+                      <i className="fas fa-robot"></i>
+                    </div>
+
+                    <div className="typing-bubble">
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
+                  </motion.div>
+                )}
+
+                <div
+                  ref={
+                    messagesEndRef
+                  }
+                />
+              </div>
+
+              {/* =================================================
+                  QUICK QUESTIONS
+              ================================================= */}
+
+              {messages.length <=
+                1 && (
+                <div className="quick-questions">
+                  <div className="quick-title">
+                    <i className="fas fa-bolt"></i>
+                    Quick questions
+                  </div>
+
+                  <div className="quick-question-list">
                     {quickQuestions.map(
-                      (question, index) => (
+                      (question) => (
                         <button
+                          key={
+                            question
+                          }
                           type="button"
-                          key={index}
                           onClick={() =>
-                            handleQuickQuestion(
+                            sendMessage(
                               question
                             )
                           }
+                          disabled={
+                            isTyping
+                          }
                         >
                           {question}
+
+                          <i className="fas fa-arrow-right"></i>
                         </button>
                       )
                     )}
                   </div>
                 </div>
               )}
-
-              {messages.map((item) => (
-                <motion.div
-                  key={item.id}
-                  className={`chat-message ${item.sender}`}
-                  initial={{
-                    opacity: 0,
-                    y: 10,
-                  }}
-                  animate={{
-                    opacity: 1,
-                    y: 0,
-                  }}
-                >
-                  <div className="message-content">
-                    {item.text}
-                  </div>
-                </motion.div>
-              ))}
-
-              {/* =================================================
-                  TYPING
-              ================================================= */}
-
-              {isTyping && (
-                <div className="chat-message bot">
-                  <div className="message-content typing-indicator">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                  </div>
-                </div>
-              )}
-
-              <div
-                ref={messagesEndRef}
-              />
             </div>
 
             {/* =================================================
-                QUICK CONTACT
+                WHATSAPP
             ================================================= */}
 
-            <div className="chatbot-actions">
-              <button
-                type="button"
-                onClick={openWhatsApp}
-              >
+            <a
+              href="https://wa.me/923222382819"
+              target="_blank"
+              rel="noreferrer"
+              className="chatbot-whatsapp"
+            >
+              <span className="whatsapp-icon">
                 <i className="fab fa-whatsapp"></i>
-                WhatsApp
-              </button>
-            </div>
+              </span>
+
+              <span className="whatsapp-text">
+                <strong>
+                  Prefer WhatsApp?
+                </strong>
+
+                <small>
+                  Let's talk directly
+                </small>
+              </span>
+
+              <i className="fas fa-arrow-right whatsapp-arrow"></i>
+            </a>
 
             {/* =================================================
                 INPUT
             ================================================= */}
 
             <div className="chatbot-input-area">
-              <textarea
-                value={message}
-                onChange={(event) =>
-                  setMessage(
-                    event.target.value
-                  )
-                }
-                onKeyDown={handleKeyDown}
-                placeholder="Type your message..."
-                rows={1}
-              />
+              <div className="chatbot-input-wrapper">
+                <i className="fas fa-message chatbot-input-icon"></i>
 
-              <button
-                type="button"
-                onClick={sendMessage}
-                disabled={
-                  !message.trim() ||
-                  isTyping
-                }
-                aria-label="Send message"
-              >
-                <i className="fas fa-paper-plane"></i>
-              </button>
+                <input
+                  type="text"
+                  value={
+                    input
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    setInput(
+                      event.target
+                        .value
+                    )
+                  }
+                  onKeyDown={
+                    handleKeyDown
+                  }
+                  placeholder="Type your message..."
+                  aria-label="Type your message"
+                  disabled={
+                    isTyping
+                  }
+                />
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    sendMessage()
+                  }
+                  disabled={
+                    !input.trim() ||
+                    isTyping
+                  }
+                  aria-label="Send message"
+                >
+                  <i className="fas fa-paper-plane"></i>
+                </button>
+              </div>
+
+              {/* =================================================
+                  POWERED
+              ================================================= */}
+
+              <div className="chatbot-powered">
+                <span>
+                  <i className="fas fa-shield-halved"></i>
+                  Secure Portfolio Assistant
+                </span>
+
+                <span className="powered-dot"></span>
+
+                <span>
+                  {isPusherConnected
+                    ? "Live Updates"
+                    : "Connecting"}
+                </span>
+              </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* =======================================================
-          FLOATING CHATBOT BUTTON
-      ======================================================= */}
-
-      <div className="chatbot-toggle-wrap">
-        <motion.button
-          type="button"
-          className="chatbot-toggle"
-          onClick={openChatbot}
-          aria-label="Open chatbot"
-          whileHover={{
-            scale: 1.05,
-          }}
-          whileTap={{
-            scale: 0.95,
-          }}
-        >
-          <i className="fas fa-robot"></i>
-        </motion.button>
-
-        {/* =====================================================
-            NOTIFICATION BADGE
-
-            IMPORTANT:
-            Badge is OUTSIDE the motion button.
-            This prevents Framer Motion transform
-            from affecting the badge position.
-        ===================================================== */}
-
-        <AnimatePresence>
-          {notificationCount > 0 && (
-            <motion.span
-              className="chatbot-notification-badge"
-              initial={{
-                opacity: 0,
-                scale: 0,
-              }}
-              animate={{
-                opacity: 1,
-                scale: 1,
-              }}
-              exit={{
-                opacity: 0,
-                scale: 0,
-              }}
-              transition={{
-                type: "spring",
-                stiffness: 500,
-                damping: 25,
-              }}
-            >
-              {notificationCount > 99
-                ? "99+"
-                : notificationCount}
-            </motion.span>
-          )}
-        </AnimatePresence>
-      </div>
     </>
   );
 }
 
 export default Chatbot;
+
