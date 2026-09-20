@@ -3,8 +3,7 @@ import { motion } from "framer-motion";
 import "../css/Contact.css"
 
 const API_URL =
-  import.meta.env.VITE_API_URL ||
-  "http://localhost:5000";
+  import.meta.env.VITE_API_URL
 
 function Contact() {
 
