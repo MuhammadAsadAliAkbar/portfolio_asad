@@ -977,7 +977,42 @@
 }
 
 
+.chatbot-toggle {
+  position: relative;
+}
 
+.chatbot-notification {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+
+  min-width: 24px;
+  height: 24px;
+
+  padding: 0 6px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 999px;
+
+  background: #ef4444;
+  color: #ffffff;
+
+  border: 2px solid #ffffff;
+
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+
+  z-index: 100;
+
+  box-shadow:
+    0 4px 12px rgba(239, 68, 68, 0.4);
+
+  pointer-events: none;
+}
 
 /* =====================================================
    MOBILE

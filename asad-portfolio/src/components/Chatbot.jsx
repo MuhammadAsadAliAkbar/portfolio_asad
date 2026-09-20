@@ -225,14 +225,6 @@ function Chatbot() {
 
       notificationAudioRef.current = audio;
 
-      /*
-        Browser autoplay policy:
-
-        Audio ko first user interaction par unlock
-        kiya jata hai. Iske baad Pusher events se
-        notification sound play ho sakta hai.
-      */
-
       const unlockAudio = async () => {
         const notificationAudio =
           notificationAudioRef.current;
@@ -362,11 +354,8 @@ function Chatbot() {
         }
 
         audio.pause();
-
         audio.currentTime = 0;
-
         audio.volume = 0.65;
-
         audio.muted = false;
 
         await audio.play();
@@ -388,11 +377,6 @@ function Chatbot() {
 
   const showNotification =
     () => {
-      /*
-        Chatbot open hai to notification badge
-        aur sound nahi dena.
-      */
-
       if (isOpenRef.current) {
         return;
       }
@@ -412,11 +396,6 @@ function Chatbot() {
     isOpenRef.current =
       isOpen;
 
-    /*
-      Chatbot open karte hi notifications
-      clear kar dein.
-    */
-
     if (isOpen) {
       setNotificationCount(0);
     }
@@ -430,7 +409,6 @@ function Chatbot() {
     const handleOpenChatbot =
       () => {
         setIsOpen(true);
-
         setNotificationCount(0);
       };
 
@@ -460,10 +438,6 @@ function Chatbot() {
       return;
     }
 
-    /* -----------------------------------------------------
-       CREATE PUSHER
-    ----------------------------------------------------- */
-
     const pusher =
       new Pusher(
         PUSHER_KEY,
@@ -479,10 +453,6 @@ function Chatbot() {
     pusherRef.current =
       pusher;
 
-    /* =====================================================
-       CONNECTED
-    ===================================================== */
-
     const onConnected =
       () => {
         console.log(
@@ -494,10 +464,6 @@ function Chatbot() {
         );
       };
 
-    /* =====================================================
-       DISCONNECTED
-    ===================================================== */
-
     const onDisconnected =
       () => {
         console.log(
@@ -508,10 +474,6 @@ function Chatbot() {
           false
         );
       };
-
-    /* =====================================================
-       ERROR
-    ===================================================== */
 
     const onError =
       (error) => {
@@ -539,10 +501,6 @@ function Chatbot() {
       "error",
       onError
     );
-
-    /* =====================================================
-       SUBSCRIBE
-    ===================================================== */
 
     const channel =
       pusher.subscribe(
@@ -589,10 +547,6 @@ function Chatbot() {
           ]
         );
 
-        /*
-          Notification only when chatbot is closed.
-        */
-
         showNotification();
       }
     );
@@ -612,10 +566,6 @@ function Chatbot() {
         if (!data?.message) {
           return;
         }
-
-        /*
-          Count + sound when chatbot closed.
-        */
 
         showNotification();
       }
@@ -657,10 +607,6 @@ function Chatbot() {
           ]
         );
 
-        /*
-          Count + sound when chatbot closed.
-        */
-
         showNotification();
       }
     );
@@ -699,11 +645,6 @@ function Chatbot() {
             },
           ]
         );
-
-        /*
-          AI response bhi notification generate karega
-          jab chatbot closed ho.
-        */
 
         showNotification();
       }
@@ -929,10 +870,6 @@ function Chatbot() {
         return;
       }
 
-      /* ---------------------------------------------------
-         ADD USER MESSAGE
-      --------------------------------------------------- */
-
       setMessages(
         (prev) => [
           ...prev,
@@ -954,10 +891,6 @@ function Chatbot() {
       setIsTyping(
         true
       );
-
-      /* ---------------------------------------------------
-         API REQUEST
-      --------------------------------------------------- */
 
       try {
         const response =
@@ -988,17 +921,6 @@ function Chatbot() {
         const data =
           await response.json();
 
-        /* -------------------------------------------------
-           DIRECT RESPONSE
-        -------------------------------------------------
-
-          Backend already sends ai-response
-          through Pusher.
-
-          If Pusher is unavailable,
-          use direct API response.
-        */
-
         if (
           !isPusherConnected &&
           data?.reply
@@ -1028,15 +950,9 @@ function Chatbot() {
           error
         );
 
-        /* -------------------------------------------------
-           LOCAL FALLBACK
-        ------------------------------------------------- */
-
         setTimeout(
           () => {
-            setIsTyping(
-              false
-            );
+            setIsTyping(false);
 
             setMessages(
               (prev) => [
@@ -1133,7 +1049,7 @@ function Chatbot() {
         <i className="fas fa-robot"></i>
 
         {/* =================================================
-            NOTIFICATION BADGE
+            NOTIFICATION COUNT
         ================================================= */}
 
         <AnimatePresence>
@@ -1274,10 +1190,6 @@ function Chatbot() {
             ================================================= */}
 
             <div className="chatbot-body">
-              {/* =================================================
-                  WELCOME
-              ================================================= */}
-
               <div className="chatbot-welcome">
                 <div className="welcome-icon">
                   <i className="fas fa-sparkles"></i>
@@ -1296,10 +1208,6 @@ function Chatbot() {
                   </p>
                 </div>
               </div>
-
-              {/* =================================================
-                  MESSAGES
-              ================================================= */}
 
               <div className="chatbot-messages">
                 {messages.map(
@@ -1352,10 +1260,6 @@ function Chatbot() {
                   )
                 )}
 
-                {/* =================================================
-                    TYPING
-                ================================================= */}
-
                 {isTyping && (
                   <motion.div
                     className="chat-message bot-message"
@@ -1386,10 +1290,6 @@ function Chatbot() {
                   }
                 />
               </div>
-
-              {/* =================================================
-                  QUICK QUESTIONS
-              ================================================= */}
 
               {messages.length <=
                 1 && (
@@ -1500,10 +1400,6 @@ function Chatbot() {
                 </button>
               </div>
 
-              {/* =================================================
-                  POWERED
-              ================================================= */}
-
               <div className="chatbot-powered">
                 <span>
                   <i className="fas fa-shield-halved"></i>
@@ -1527,4 +1423,5 @@ function Chatbot() {
 }
 
 export default Chatbot;
+
 
