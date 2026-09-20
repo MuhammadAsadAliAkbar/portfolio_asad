@@ -1188,7 +1188,7 @@ function Chatbot() {
                 </div>
               </div>
 
-              <button
+              {/* <button
                 type="button"
                 className="chatbot-close"
                 onClick={
@@ -1197,7 +1197,7 @@ function Chatbot() {
                 aria-label="Close chatbot"
               >
                 <i className="fas fa-times"></i>
-              </button>
+              </button> */}
             </div>
 
             {/* =================================================
