@@ -1,12 +1,13 @@
-
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import Pusher from "pusher";
 import mongoose from "mongoose";
 import nodemailer from "nodemailer";
+import crypto from "crypto";
 
 import Contact from "./models/Contact.js";
+import Message from "./models/Message.js";
 
 dotenv.config();
 
@@ -19,7 +20,8 @@ const app = express();
 const PORT =
   process.env.PORT || 5000;
 
-const PYTHON_API = "https://python-service-aau7.vercel.app"
+const PYTHON_API =
+  "https://python-service-aau7.vercel.app";
 
 /* =========================================================
    MIDDLEWARE
@@ -28,7 +30,15 @@ const PYTHON_API = "https://python-service-aau7.vercel.app"
 app.use(cors());
 
 app.use(
-  express.json()
+  express.json({
+    limit: "10mb",
+  })
+);
+
+app.use(
+  express.urlencoded({
+    extended: true,
+  })
 );
 
 /* =========================================================
@@ -86,22 +96,16 @@ const transporter =
 
 transporter.verify(
   (error) => {
-
     if (error) {
-
       console.error(
         "❌ SMTP connection failed:",
         error
       );
-
     } else {
-
       console.log(
         "📧 Gmail SMTP is ready"
       );
-
     }
-
   }
 );
 
@@ -123,8 +127,7 @@ const pusher =
     cluster:
       process.env.PUSHER_CLUSTER,
 
-    useTLS:
-      true,
+    useTLS: true,
   });
 
 /* =========================================================
@@ -134,7 +137,6 @@ const pusher =
 app.get(
   "/",
   (req, res) => {
-
     res.json({
       success: true,
 
@@ -144,13 +146,11 @@ app.get(
       python:
         PYTHON_API,
 
-      pusher:
-        true,
+      pusher: true,
 
       time:
         new Date().toISOString(),
     });
-
   }
 );
 
@@ -161,7 +161,6 @@ app.get(
 app.get(
   "/health",
   (req, res) => {
-
     res.json({
       success: true,
 
@@ -171,9 +170,483 @@ app.get(
       time:
         new Date().toISOString(),
     });
-
   }
 );
+
+/* =========================================================
+   PUSHER PRIVATE CHANNEL AUTH
+========================================================= */
+
+app.post(
+  "/api/pusher/auth",
+  (req, res) => {
+    try {
+      const {
+        socket_id,
+        channel_name,
+      } = req.body;
+
+      /* -----------------------------------------------------
+         VALIDATION
+      ----------------------------------------------------- */
+
+      if (
+        !socket_id ||
+        !channel_name
+      ) {
+        return res.status(400).json({
+          success: false,
+
+          message:
+            "socket_id and channel_name are required",
+        });
+      }
+
+      /* -----------------------------------------------------
+         ONLY ALLOW PRIVATE CHAT CHANNELS
+      ----------------------------------------------------- */
+
+      if (
+        !channel_name.startsWith(
+          "private-chat-"
+        )
+      ) {
+        return res.status(403).json({
+          success: false,
+
+          message:
+            "Unauthorized Pusher channel",
+        });
+      }
+
+      /* -----------------------------------------------------
+         AUTHENTICATE PUSHER
+      ----------------------------------------------------- */
+
+      const authResponse =
+        pusher.authenticate(
+          socket_id,
+          channel_name
+        );
+
+      return res.json(
+        authResponse
+      );
+    } catch (error) {
+      console.error(
+        "❌ Pusher auth error:",
+        error
+      );
+
+      return res.status(500).json({
+        success: false,
+
+        message:
+          "Pusher authentication failed",
+      });
+    }
+  }
+);
+
+/* =========================================================
+   REAL-TIME MESSAGE CHAT
+========================================================= */
+
+
+/* =========================================================
+   SEND VISITOR MESSAGE
+========================================================= */
+
+app.post(
+  "/api/messages/send",
+  async (req, res) => {
+    try {
+      const {
+        conversationId,
+        senderId,
+        senderName,
+        message,
+      } = req.body;
+
+      /* -----------------------------------------------------
+         VALIDATION
+      ----------------------------------------------------- */
+
+      if (
+        !conversationId ||
+        !senderId ||
+        !senderName ||
+        !message
+      ) {
+        return res.status(400).json({
+          success: false,
+
+          message:
+            "All fields are required",
+        });
+      }
+
+      const trimmedMessage =
+        String(message).trim();
+
+      if (!trimmedMessage) {
+        return res.status(400).json({
+          success: false,
+
+          message:
+            "Message cannot be empty",
+        });
+      }
+
+      if (
+        trimmedMessage.length > 5000
+      ) {
+        return res.status(400).json({
+          success: false,
+
+          message:
+            "Message cannot exceed 5000 characters",
+        });
+      }
+
+      /* -----------------------------------------------------
+         MESSAGE ID
+      ----------------------------------------------------- */
+
+      const messageId =
+        crypto.randomUUID();
+
+      /* -----------------------------------------------------
+         SAVE MESSAGE
+      ----------------------------------------------------- */
+
+      const newMessage =
+        await Message.create({
+          messageId,
+
+          conversationId:
+            String(conversationId),
+
+          senderId:
+            String(senderId),
+
+          senderName:
+            String(senderName),
+
+          senderType:
+            "visitor",
+
+          message:
+            trimmedMessage,
+        });
+
+      /* -----------------------------------------------------
+         PUSHER DATA
+      ----------------------------------------------------- */
+
+      const messageData = {
+        messageId:
+          newMessage.messageId,
+
+        conversationId:
+          newMessage.conversationId,
+
+        senderId:
+          newMessage.senderId,
+
+        senderName:
+          newMessage.senderName,
+
+        senderType:
+          newMessage.senderType,
+
+        message:
+          newMessage.message,
+
+        createdAt:
+          newMessage.createdAt,
+      };
+
+      /* -----------------------------------------------------
+         PUSHER REAL-TIME EVENT
+      ----------------------------------------------------- */
+
+      try {
+        await pusher.trigger(
+          `private-chat-${conversationId}`,
+          "new-message",
+          messageData
+        );
+
+        console.log(
+          "📡 Visitor message broadcasted:",
+          messageId
+        );
+      } catch (pusherError) {
+        console.error(
+          "❌ Pusher visitor message error:",
+          pusherError
+        );
+
+        /*
+         * Message is already saved in MongoDB.
+         * Don't fail the API just because Pusher
+         * temporarily failed.
+         */
+      }
+
+      /* -----------------------------------------------------
+         RESPONSE
+      ----------------------------------------------------- */
+
+      return res.status(201).json({
+        success: true,
+
+        message:
+          "Message sent successfully",
+
+        data:
+          messageData,
+      });
+    } catch (error) {
+      console.error(
+        "❌ Send visitor message error:",
+        error
+      );
+
+      return res.status(500).json({
+        success: false,
+
+        message:
+          "Failed to send message",
+      });
+    }
+  }
+);
+
+
+/* =========================================================
+   GET CONVERSATION MESSAGES
+========================================================= */
+
+app.get("/api/messages/:conversationId", async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+
+    console.log(
+      "📥 GET conversation messages:",
+      conversationId
+    );
+
+    if (!conversationId) {
+      return res.status(400).json({
+        success: false,
+        message: "Conversation ID is required",
+      });
+    }
+
+    const messages = await Message.find({
+      conversationId: String(conversationId),
+    })
+      .sort({
+        createdAt: 1,
+      })
+      .limit(200)
+      .lean();
+
+    console.log(
+      `📨 Found ${messages.length} messages`
+    );
+
+    console.log(
+      "📨 Messages:",
+      messages
+    );
+
+    return res.status(200).json({
+      success: true,
+      conversationId,
+      count: messages.length,
+      messages,
+    });
+  } catch (error) {
+    console.error(
+      "❌ Get conversation messages error:",
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to load messages",
+    });
+  }
+});
+
+/* =========================================================
+   ADMIN SEND MESSAGE
+========================================================= */
+
+app.post(
+  "/api/messages/admin/send",
+  async (req, res) => {
+    try {
+      const {
+        conversationId,
+        senderId,
+        senderName,
+        message,
+      } = req.body;
+
+      /* -----------------------------------------------------
+         VALIDATION
+      ----------------------------------------------------- */
+
+      if (
+        !conversationId ||
+        !senderId ||
+        !senderName ||
+        !message
+      ) {
+        return res.status(400).json({
+          success: false,
+
+          message:
+            "All fields are required",
+        });
+      }
+
+      const trimmedMessage =
+        String(message).trim();
+
+      if (!trimmedMessage) {
+        return res.status(400).json({
+          success: false,
+
+          message:
+            "Message cannot be empty",
+        });
+      }
+
+      if (
+        trimmedMessage.length > 5000
+      ) {
+        return res.status(400).json({
+          success: false,
+
+          message:
+            "Message cannot exceed 5000 characters",
+        });
+      }
+
+      /* -----------------------------------------------------
+         MESSAGE ID
+      ----------------------------------------------------- */
+
+      const messageId =
+        crypto.randomUUID();
+
+      /* -----------------------------------------------------
+         SAVE ADMIN MESSAGE
+      ----------------------------------------------------- */
+
+      const newMessage =
+        await Message.create({
+          messageId,
+
+          conversationId:
+            String(conversationId),
+
+          senderId:
+            String(senderId),
+
+          senderName:
+            String(senderName),
+
+          senderType:
+            "admin",
+
+          message:
+            trimmedMessage,
+        });
+
+      /* -----------------------------------------------------
+         PUSHER DATA
+      ----------------------------------------------------- */
+
+      const messageData = {
+        messageId:
+          newMessage.messageId,
+
+        conversationId:
+          newMessage.conversationId,
+
+        senderId:
+          newMessage.senderId,
+
+        senderName:
+          newMessage.senderName,
+
+        senderType:
+          newMessage.senderType,
+
+        message:
+          newMessage.message,
+
+        createdAt:
+          newMessage.createdAt,
+      };
+
+      /* -----------------------------------------------------
+         PUSHER
+      ----------------------------------------------------- */
+
+      try {
+        await pusher.trigger(
+          `private-chat-${conversationId}`,
+          "new-message",
+          messageData
+        );
+
+        console.log(
+          "📡 Admin message broadcasted:",
+          messageId
+        );
+      } catch (pusherError) {
+        console.error(
+          "❌ Pusher admin message error:",
+          pusherError
+        );
+      }
+
+      /* -----------------------------------------------------
+         RESPONSE
+      ----------------------------------------------------- */
+
+      return res.status(201).json({
+        success: true,
+
+        message:
+          "Admin message sent successfully",
+
+        data:
+          messageData,
+      });
+    } catch (error) {
+      console.error(
+        "❌ Admin send message error:",
+        error
+      );
+
+      return res.status(500).json({
+        success: false,
+
+        message:
+          "Failed to send admin message",
+      });
+    }
+  }
+);
+
 
 /* =========================================================
    CHAT
@@ -183,9 +656,7 @@ app.get(
 app.post(
   "/api/chat",
   async (req, res) => {
-
     try {
-
       const {
         message,
       } = req.body;
@@ -195,14 +666,12 @@ app.post(
       --------------------------------------------------- */
 
       if (!message) {
-
         return res.status(400).json({
           success: false,
 
           message:
             "Message is required",
         });
-
       }
 
       /* ===================================================
@@ -210,7 +679,6 @@ app.post(
       =================================================== */
 
       try {
-
         await pusher.trigger(
           "portfolio-updates",
           "client-message",
@@ -229,14 +697,11 @@ app.post(
         console.log(
           "📩 Client message notification sent"
         );
-
       } catch (pusherError) {
-
         console.error(
           "Pusher client-message error:",
           pusherError
         );
-
       }
 
       /* ===================================================
@@ -269,11 +734,9 @@ app.post(
       if (
         !pythonResponse.ok
       ) {
-
         throw new Error(
           `Python API returned ${pythonResponse.status}`
         );
-
       }
 
       /* ---------------------------------------------------
@@ -292,7 +755,6 @@ app.post(
       =================================================== */
 
       try {
-
         await pusher.trigger(
           "portfolio-updates",
           "ai-response",
@@ -305,14 +767,11 @@ app.post(
               new Date().toISOString(),
           }
         );
-
       } catch (pusherError) {
-
         console.error(
           "Pusher AI response error:",
           pusherError
         );
-
       }
 
       /* ===================================================
@@ -324,9 +783,7 @@ app.post(
 
         reply,
       });
-
     } catch (error) {
-
       console.error(
         "❌ Chat error:",
         error
@@ -338,11 +795,10 @@ app.post(
         message:
           "Python AI service unavailable",
       });
-
     }
-
   }
 );
+
 
 /* =========================================================
    PORTFOLIO UPDATE
@@ -352,9 +808,7 @@ app.post(
 app.post(
   "/api/portfolio/update",
   async (req, res) => {
-
     try {
-
       const {
         title,
         message,
@@ -366,14 +820,12 @@ app.post(
       --------------------------------------------------- */
 
       if (!message) {
-
         return res.status(400).json({
           success: false,
 
           message:
             "message is required",
         });
-
       }
 
       /* ---------------------------------------------------
@@ -381,7 +833,6 @@ app.post(
       --------------------------------------------------- */
 
       const update = {
-
         title:
           title ||
           "Portfolio Update",
@@ -392,7 +843,6 @@ app.post(
 
         createdAt:
           new Date().toISOString(),
-
       };
 
       /* ---------------------------------------------------
@@ -415,36 +865,29 @@ app.post(
       --------------------------------------------------- */
 
       return res.json({
-
         success: true,
 
         message:
           "Portfolio update sent",
 
         update,
-
       });
-
     } catch (error) {
-
       console.error(
         "Portfolio update error:",
         error
       );
 
       return res.status(500).json({
-
         success: false,
 
         message:
           "Failed to send update",
-
       });
-
     }
-
   }
 );
+
 
 /* =========================================================
    BROADCAST CHATBOT MESSAGE
@@ -454,22 +897,18 @@ app.post(
 app.post(
   "/api/chatbot/broadcast",
   async (req, res) => {
-
     try {
-
       const {
         message,
       } = req.body;
 
       if (!message) {
-
         return res.status(400).json({
           success: false,
 
           message:
             "message is required",
         });
-
       }
 
       await pusher.trigger(
@@ -487,46 +926,37 @@ app.post(
       );
 
       return res.json({
-
         success: true,
 
         message:
           "Message broadcasted",
-
       });
-
     } catch (error) {
-
       console.error(
         "Broadcast error:",
         error
       );
 
       return res.status(500).json({
-
         success: false,
 
         message:
           "Broadcast failed",
-
       });
-
     }
-
   }
 );
 
+
 /* =========================================================
    CONTACT API
-   NEW
+   EXISTING
 ========================================================= */
 
 app.post(
   "/api/contact",
   async (req, res) => {
-
     try {
-
       const {
         name,
         email,
@@ -544,16 +974,12 @@ app.post(
         !subject ||
         !message
       ) {
-
         return res.status(400).json({
-
           success: false,
 
           message:
             "Name, email, subject and message are required",
-
         });
-
       }
 
       /* ===================================================
@@ -568,16 +994,12 @@ app.post(
           email.trim()
         )
       ) {
-
         return res.status(400).json({
-
           success: false,
 
           message:
             "Please provide a valid email address",
-
         });
-
       }
 
       /* ===================================================
@@ -588,7 +1010,9 @@ app.post(
         name.trim();
 
       const cleanEmail =
-        email.trim().toLowerCase();
+        email
+          .trim()
+          .toLowerCase();
 
       const cleanSubject =
         subject.trim();
@@ -602,7 +1026,6 @@ app.post(
 
       const contact =
         await Contact.create({
-
           name:
             cleanName,
 
@@ -614,7 +1037,6 @@ app.post(
 
           message:
             cleanMessage,
-
         });
 
       console.log(
@@ -627,7 +1049,6 @@ app.post(
       =================================================== */
 
       const mailOptions = {
-
         from:
           `"Muhammad Asad Portfolio" <${process.env.SMTP_USER}>`,
 
@@ -645,16 +1066,21 @@ app.post(
 `New message received from your portfolio.
 
 Name: ${cleanName}
+
 Email: ${cleanEmail}
+
 Subject: ${cleanSubject}
 
 Message:
+
 ${cleanMessage}
 
 Contact ID:
+
 ${contact._id}
 
 Received:
+
 ${new Date().toISOString()}
 `,
 
@@ -767,8 +1193,10 @@ ${new Date().toISOString()}
         font-size:12px;
       "
     >
+
       Contact ID:
       ${contact._id}
+
     </p>
 
   </div>
@@ -777,7 +1205,6 @@ ${new Date().toISOString()}
 
 </html>
 `,
-
       };
 
       await transporter.sendMail(
@@ -793,12 +1220,10 @@ ${new Date().toISOString()}
       =================================================== */
 
       try {
-
         await pusher.trigger(
           "portfolio-updates",
           "client-message",
           {
-
             sender:
               "client",
 
@@ -819,29 +1244,24 @@ ${new Date().toISOString()}
 
             createdAt:
               new Date().toISOString(),
-
           }
         );
 
         console.log(
           "📡 Contact notification sent through Pusher"
         );
-
       } catch (pusherError) {
-
         console.error(
           "Pusher contact notification error:",
           pusherError
         );
-
       }
 
       /* ===================================================
-         SUCCESS RESPONSE
+         SUCCESS
       =================================================== */
 
       return res.status(201).json({
-
         success: true,
 
         message:
@@ -849,29 +1269,60 @@ ${new Date().toISOString()}
 
         contactId:
           contact._id,
-
       });
-
     } catch (error) {
-
       console.error(
         "❌ Contact API error:",
         error
       );
 
       return res.status(500).json({
-
         success: false,
 
         message:
           "Failed to send your message.",
-
       });
-
     }
-
   }
 );
+
+
+/* =========================================================
+   GLOBAL ERROR HANDLER
+========================================================= */
+
+app.use(
+  (error, req, res, next) => {
+    console.error(
+      "❌ Unhandled server error:",
+      error
+    );
+
+    res.status(500).json({
+      success: false,
+
+      message:
+        "Internal server error",
+    });
+  }
+);
+
+
+/* =========================================================
+   404
+========================================================= */
+
+app.use(
+  (req, res) => {
+    res.status(404).json({
+      success: false,
+
+      message:
+        "API endpoint not found",
+    });
+  }
+);
+
 
 /* =========================================================
    START SERVER
@@ -880,9 +1331,26 @@ ${new Date().toISOString()}
 app.listen(
   PORT,
   () => {
+    console.log("");
 
     console.log(
-      `🚀 Backend running on http://localhost:${PORT}`
+      "======================================"
+    );
+
+    console.log(
+      "🚀 Asad Portfolio Backend"
+    );
+
+    console.log(
+      "======================================"
+    );
+
+    console.log(
+      `🚀 Backend running on port ${PORT}`
+    );
+
+    console.log(
+      `🌐 http://localhost:${PORT}`
     );
 
     console.log(
@@ -893,6 +1361,18 @@ app.listen(
       `📡 Pusher cluster: ${process.env.PUSHER_CLUSTER}`
     );
 
+    console.log(
+      "💬 Message Chat API: ENABLED"
+    );
+
+    console.log(
+      "📧 Contact API: ENABLED"
+    );
+
+    console.log(
+      "======================================"
+    );
+
+    console.log("");
   }
 );
-
