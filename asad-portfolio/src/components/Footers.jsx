@@ -7,6 +7,28 @@ function Footers() {
 
   const [showBackToTop, setShowBackToTop] = useState(false);
 
+const [isChatbotOpen, setIsChatbotOpen] = useState(false);
+
+const toggleChatbot = () => {
+  setIsChatbotOpen(prev => {
+    const newState = !prev;
+    
+    if (newState) {
+      openChatbot();   // chatbot open karo
+    } else {
+      closeChatbot();  // chatbot close karo
+    }
+    
+    return newState;
+  });
+};
+
+const closeChatbot = () => {
+  window.dispatchEvent(
+    new CustomEvent("close-chatbot")
+  );
+};
+
   /* =================================================
      BACK TO TOP
   ================================================= */
@@ -462,7 +484,7 @@ function Footers() {
             AI CHATBOT
         ================================================= */}
 
-        <motion.button
+        {/* <motion.button
           type="button"
           className="premium-float-btn premium-chatbot"
           aria-label="Open Chatbot"
@@ -497,7 +519,37 @@ function Footers() {
 
           </span>
 
-        </motion.button>
+        </motion.button> */}
+
+<motion.button
+  type="button"
+  className="premium-float-btn premium-chatbot"
+  aria-label={isChatbotOpen ? "Close Chatbot" : "Open Chatbot"}
+  title={isChatbotOpen ? "Close" : "Chatbot"}
+  onClick={toggleChatbot}
+  whileHover={{
+    scale: 1.08,
+    y: -4,
+  }}
+  whileTap={{
+    scale: 0.94,
+  }}
+>
+  <span className="premium-btn-glow"></span>
+
+  <span className="premium-btn-inner">
+    <i className={`fas ${isChatbotOpen ? "fa-chevron-down" : "fa-robot"}`}></i>
+  </span>
+
+  <span className="premium-float-tooltip">
+    <strong>
+      {isChatbotOpen ? "Close Assistant" : "AI Assistant"}
+    </strong>
+    <small>
+      {isChatbotOpen ? "Hide chat" : "Ask me anything"}
+    </small>
+  </span>
+</motion.button>
 
       </div>
 
