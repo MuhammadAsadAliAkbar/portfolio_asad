@@ -20,8 +20,7 @@ const PORT =
   process.env.PORT || 5000;
 
 const PYTHON_API =
-  process.env.PYTHON_API ||
-  "http://localhost:8000";
+  process.env.PYTHON_API
 
 /* =========================================================
    MIDDLEWARE
