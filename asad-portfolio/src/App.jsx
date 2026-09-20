@@ -19,7 +19,7 @@ import Footers from "./components/Footers";
 import Knowledge from "./components/Knowledge";
 import Chatbot from "./components/Chatbot";
 import ClientAchievements from './components/ClientAchievements'
-import MessageChat from "./components/MessageChat";
+// import MessageChat from "./components/MessageChat";
 
 function App() {
   const [count, setCount] = useState(0)
@@ -43,7 +43,7 @@ function App() {
       </main>
       <Footers />
       <Chatbot />
-      <MessageChat />
+      {/* <MessageChat /> */}
       {/* <Footer /> */}
    </>
      
