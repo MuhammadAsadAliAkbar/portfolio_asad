@@ -46,7 +46,8 @@ const quickQuestions = [
 ========================================================= */
 
 const getBotReply = (message) => {
-  const text = message.toLowerCase();
+  const text =
+    message.toLowerCase();
 
   if (
     text.includes("hello") ||
@@ -139,39 +140,48 @@ const getBotReply = (message) => {
 
 function Chatbot() {
   /* =======================================================
-     CHATBOT OPEN / CLOSE
+     OPEN / CLOSE
   ======================================================= */
 
-  const [isOpen, setIsOpen] =
-    useState(false);
+  const [
+    isOpen,
+    setIsOpen,
+  ] = useState(false);
 
   /* =======================================================
      MESSAGES
   ======================================================= */
 
-  const [messages, setMessages] =
-    useState([
-      {
-        id: 1,
-        sender: "bot",
-        text:
-          "Hi! 👋 I'm Asad's virtual assistant. How can I help you today?",
-      },
-    ]);
+  const [
+    messages,
+    setMessages,
+  ] = useState([
+    {
+      id: "welcome",
+      sender: "bot",
+      text:
+        "Hi! 👋 I'm Asad's virtual assistant. How can I help you today?",
+      type: "welcome",
+    },
+  ]);
 
   /* =======================================================
      INPUT
   ======================================================= */
 
-  const [input, setInput] =
-    useState("");
+  const [
+    input,
+    setInput,
+  ] = useState("");
 
   /* =======================================================
      TYPING
   ======================================================= */
 
-  const [isTyping, setIsTyping] =
-    useState(false);
+  const [
+    isTyping,
+    setIsTyping,
+  ] = useState(false);
 
   /* =======================================================
      PUSHER STATUS
@@ -190,6 +200,15 @@ function Chatbot() {
     notificationCount,
     setNotificationCount,
   ] = useState(0);
+
+  /* =======================================================
+     PORTFOLIO UPDATE SENDING
+  ======================================================= */
+
+  const [
+    isSendingUpdate,
+    setIsSendingUpdate,
+  ] = useState(false);
 
   /* =======================================================
      REFS
@@ -211,68 +230,79 @@ function Chatbot() {
     useRef(null);
 
   /* =======================================================
-     CREATE + UNLOCK NOTIFICATION AUDIO
+     AUDIO INITIALIZATION
   ======================================================= */
 
   useEffect(() => {
     let audio;
 
     try {
-      audio = new Audio(notificationSound);
+      audio =
+        new Audio(
+          notificationSound
+        );
 
-      audio.preload = "auto";
-      audio.volume = 0.65;
+      audio.preload =
+        "auto";
 
-      notificationAudioRef.current = audio;
+      audio.volume =
+        0.65;
 
-      const unlockAudio = async () => {
-        const notificationAudio =
-          notificationAudioRef.current;
+      notificationAudioRef.current =
+        audio;
 
-        if (!notificationAudio) {
-          return;
-        }
+      const unlockAudio =
+        async () => {
+          const notificationAudio =
+            notificationAudioRef.current;
 
-        try {
-          notificationAudio.muted = true;
-          notificationAudio.currentTime = 0;
+          if (!notificationAudio) {
+            return;
+          }
 
-          await notificationAudio.play();
+          try {
+            notificationAudio.muted =
+              true;
 
-          notificationAudio.pause();
-          notificationAudio.currentTime = 0;
-          notificationAudio.muted = false;
+            notificationAudio.currentTime =
+              0;
 
-          console.log(
-            "🔊 Notification sound unlocked"
-          );
+            await notificationAudio.play();
 
-          window.removeEventListener(
-            "click",
-            unlockAudio
-          );
+            notificationAudio.pause();
 
-          window.removeEventListener(
-            "pointerdown",
-            unlockAudio
-          );
+            notificationAudio.currentTime =
+              0;
 
-          window.removeEventListener(
-            "keydown",
-            unlockAudio
-          );
+            notificationAudio.muted =
+              false;
 
-          window.removeEventListener(
-            "touchstart",
-            unlockAudio
-          );
-        } catch (error) {
-          console.warn(
-            "⚠️ Notification sound waiting for user interaction:",
-            error
-          );
-        }
-      };
+            window.removeEventListener(
+              "click",
+              unlockAudio
+            );
+
+            window.removeEventListener(
+              "pointerdown",
+              unlockAudio
+            );
+
+            window.removeEventListener(
+              "keydown",
+              unlockAudio
+            );
+
+            window.removeEventListener(
+              "touchstart",
+              unlockAudio
+            );
+          } catch (error) {
+            console.warn(
+              "⚠️ Audio unlock waiting:",
+              error
+            );
+          }
+        };
 
       window.addEventListener(
         "click",
@@ -321,7 +351,9 @@ function Chatbot() {
 
         if (audio) {
           audio.pause();
-          audio.currentTime = 0;
+
+          audio.currentTime =
+            0;
         }
 
         notificationAudioRef.current =
@@ -329,7 +361,7 @@ function Chatbot() {
       };
     } catch (error) {
       console.error(
-        "❌ Notification audio initialization error:",
+        "❌ Audio initialization error:",
         error
       );
     }
@@ -346,26 +378,24 @@ function Chatbot() {
           notificationAudioRef.current;
 
         if (!audio) {
-          console.warn(
-            "⚠️ Notification audio is not initialized"
-          );
-
           return;
         }
 
         audio.pause();
-        audio.currentTime = 0;
-        audio.volume = 0.65;
-        audio.muted = false;
+
+        audio.currentTime =
+          0;
+
+        audio.volume =
+          0.65;
+
+        audio.muted =
+          false;
 
         await audio.play();
-
-        console.log(
-          "🔊 Notification sound played"
-        );
       } catch (error) {
         console.warn(
-          "⚠️ Notification sound could not be played:",
+          "⚠️ Notification sound error:",
           error
         );
       }
@@ -382,14 +412,15 @@ function Chatbot() {
       }
 
       setNotificationCount(
-        (prev) => prev + 1
+        (prev) =>
+          prev + 1
       );
 
       playNotificationSound();
     };
 
   /* =======================================================
-     KEEP OPEN STATE IN REF
+     OPEN STATE REF
   ======================================================= */
 
   useEffect(() => {
@@ -402,35 +433,47 @@ function Chatbot() {
   }, [isOpen]);
 
   /* =======================================================
-     EXTERNAL OPEN CHATBOT EVENT
+     EXTERNAL EVENTS
   ======================================================= */
 
   useEffect(() => {
     const handleOpenChatbot =
       () => {
         setIsOpen(true);
-        setNotificationCount(0);
+
+        setNotificationCount(
+          0
+        );
       };
 
-    const handleCloseChatbot = () => {
-      setIsOpen(false);
-      setNotificationCount(0);
-    };
+    const handleCloseChatbot =
+      () => {
+        setIsOpen(false);
 
-    window.addEventListener(
-      "close-chatbot",
-      handleCloseChatbot
-    );
+        setNotificationCount(
+          0
+        );
+      };
 
     window.addEventListener(
       "open-chatbot",
       handleOpenChatbot
     );
 
+    window.addEventListener(
+      "close-chatbot",
+      handleCloseChatbot
+    );
+
     return () => {
       window.removeEventListener(
         "open-chatbot",
         handleOpenChatbot
+      );
+
+      window.removeEventListener(
+        "close-chatbot",
+        handleCloseChatbot
       );
     };
   }, []);
@@ -442,11 +485,15 @@ function Chatbot() {
   useEffect(() => {
     if (!PUSHER_KEY) {
       console.warn(
-        "⚠️ Pusher key missing. Add VITE_PUSHER_KEY to .env"
+        "⚠️ VITE_PUSHER_KEY missing."
       );
 
       return;
     }
+
+    console.log(
+      "🔌 Connecting Pusher..."
+    );
 
     const pusher =
       new Pusher(
@@ -463,7 +510,11 @@ function Chatbot() {
     pusherRef.current =
       pusher;
 
-    const onConnected =
+    /* =====================================================
+       CONNECTION EVENTS
+    ===================================================== */
+
+    const handleConnected =
       () => {
         console.log(
           "✅ Pusher connected"
@@ -474,7 +525,7 @@ function Chatbot() {
         );
       };
 
-    const onDisconnected =
+    const handleDisconnected =
       () => {
         console.log(
           "⚠️ Pusher disconnected"
@@ -485,7 +536,7 @@ function Chatbot() {
         );
       };
 
-    const onError =
+    const handleError =
       (error) => {
         console.error(
           "❌ Pusher error:",
@@ -499,18 +550,22 @@ function Chatbot() {
 
     pusher.connection.bind(
       "connected",
-      onConnected
+      handleConnected
     );
 
     pusher.connection.bind(
       "disconnected",
-      onDisconnected
+      handleDisconnected
     );
 
     pusher.connection.bind(
       "error",
-      onError
+      handleError
     );
+
+    /* =====================================================
+       PORTFOLIO CHANNEL
+    ===================================================== */
 
     const channel =
       pusher.subscribe(
@@ -519,6 +574,19 @@ function Chatbot() {
 
     channelRef.current =
       channel;
+
+    /* =====================================================
+       SUBSCRIPTION SUCCESS
+    ===================================================== */
+
+    channel.bind(
+      "pusher:subscription_succeeded",
+      () => {
+        console.log(
+          "✅ Subscribed to portfolio-updates"
+        );
+      }
+    );
 
     /* =====================================================
        PORTFOLIO UPDATE
@@ -532,30 +600,57 @@ function Chatbot() {
           data
         );
 
+        if (!data) {
+          return;
+        }
+
         const title =
-          data?.title ||
+          data.title ||
           "Portfolio Update";
 
         const updateMessage =
-          data?.message ||
+          data.message ||
           "A new portfolio update is available.";
+
+        const portfolioMessage = {
+          id:
+            data.id ||
+            `portfolio-${Date.now()}-${Math.random()}`,
+
+          sender:
+            "bot",
+
+          text:
+            `🔔 ${title}\n\n${updateMessage}`,
+
+          type:
+            "portfolio-update",
+
+          title,
+
+          updateType:
+            data.type ||
+            "portfolio",
+
+          createdAt:
+            data.createdAt ||
+            new Date().toISOString(),
+        };
+
+        /* ===============================================
+           ADD MESSAGE
+        =============================================== */
 
         setMessages(
           (prev) => [
             ...prev,
-            {
-              id:
-                Date.now() +
-                Math.random(),
-
-              sender:
-                "bot",
-
-              text:
-                `🔔 ${title}\n\n${updateMessage}`,
-            },
+            portfolioMessage,
           ]
         );
+
+        /* ===============================================
+           NOTIFICATION
+        =============================================== */
 
         showNotification();
       }
@@ -569,7 +664,7 @@ function Chatbot() {
       "client-message",
       (data) => {
         console.log(
-          "💬 New client message received:",
+          "💬 Client message:",
           data
         );
 
@@ -582,14 +677,14 @@ function Chatbot() {
     );
 
     /* =====================================================
-       GENERAL CHATBOT MESSAGE
+       CHATBOT MESSAGE
     ===================================================== */
 
     channel.bind(
       "chatbot-message",
       (data) => {
         console.log(
-          "💬 Chatbot message received:",
+          "💬 Chatbot message:",
           data
         );
 
@@ -602,8 +697,7 @@ function Chatbot() {
             ...prev,
             {
               id:
-                Date.now() +
-                Math.random(),
+                `chatbot-${Date.now()}-${Math.random()}`,
 
               sender:
                 data.sender ===
@@ -613,6 +707,9 @@ function Chatbot() {
 
               text:
                 data.message,
+
+              type:
+                "chatbot-message",
             },
           ]
         );
@@ -629,7 +726,7 @@ function Chatbot() {
       "ai-response",
       (data) => {
         console.log(
-          "🤖 AI response received:",
+          "🤖 AI response:",
           data
         );
 
@@ -644,14 +741,16 @@ function Chatbot() {
             ...prev,
             {
               id:
-                Date.now() +
-                Math.random(),
+                `ai-${Date.now()}-${Math.random()}`,
 
               sender:
                 "bot",
 
               text:
                 data.reply,
+
+              type:
+                "ai-response",
             },
           ]
         );
@@ -687,17 +786,17 @@ function Chatbot() {
 
       pusher.connection.unbind(
         "connected",
-        onConnected
+        handleConnected
       );
 
       pusher.connection.unbind(
         "disconnected",
-        onDisconnected
+        handleDisconnected
       );
 
       pusher.connection.unbind(
         "error",
-        onError
+        handleError
       );
 
       pusher.disconnect();
@@ -715,12 +814,10 @@ function Chatbot() {
   ======================================================= */
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView(
-      {
-        behavior:
-          "smooth",
-      }
-    );
+    messagesEndRef.current?.scrollIntoView({
+      behavior:
+        "smooth",
+    });
   }, [
     messages,
     isTyping,
@@ -737,6 +834,10 @@ function Chatbot() {
       type = "portfolio",
     }) => {
       try {
+        /* ================================================
+           VALIDATION
+        ================================================ */
+
         if (!message?.trim()) {
           console.warn(
             "Portfolio update message is required."
@@ -744,6 +845,26 @@ function Chatbot() {
 
           return null;
         }
+
+        if (!API_URL) {
+          console.error(
+            "❌ VITE_API_URL is missing."
+          );
+
+          return null;
+        }
+
+        console.log(
+          "📤 Sending portfolio update..."
+        );
+
+        setIsSendingUpdate(
+          true
+        );
+
+        /* ================================================
+           API REQUEST
+        ================================================ */
 
         const response =
           await fetch(
@@ -759,15 +880,28 @@ function Chatbot() {
 
               body:
                 JSON.stringify({
-                  title,
-                  message,
+                  title:
+                    title?.trim() ||
+                    "Portfolio Update",
+
+                  message:
+                    message.trim(),
+
                   type,
                 }),
             }
           );
 
+        /* ================================================
+           RESPONSE
+        ================================================ */
+
         const data =
           await response.json();
+
+        /* ================================================
+           ERROR
+        ================================================ */
 
         if (
           !response.ok ||
@@ -779,8 +913,12 @@ function Chatbot() {
           );
         }
 
+        /* ================================================
+           SUCCESS
+        ================================================ */
+
         console.log(
-          "🔔 Portfolio update sent:",
+          "🔔 Portfolio update sent successfully:",
           data
         );
 
@@ -792,6 +930,38 @@ function Chatbot() {
         );
 
         return null;
+      } finally {
+        setIsSendingUpdate(
+          false
+        );
+      }
+    };
+
+  /* =======================================================
+     TEST PORTFOLIO UPDATE
+     
+     IMPORTANT:
+     Remove this function/button in production.
+  ======================================================= */
+
+  const handleTestPortfolioUpdate =
+    async () => {
+      const result =
+        await sendPortfolioUpdate({
+          title:
+            "New Project Added 🚀",
+
+          message:
+            "A new RPA Management System has been added to Muhammad Asad Ali Akbar's portfolio.",
+
+          type:
+            "project",
+        });
+
+      if (result?.success) {
+        console.log(
+          "✅ Test portfolio update broadcast successfully."
+        );
       }
     };
 
@@ -808,6 +978,14 @@ function Chatbot() {
         if (!message?.trim()) {
           console.warn(
             "Chatbot broadcast message is required."
+          );
+
+          return null;
+        }
+
+        if (!API_URL) {
+          console.error(
+            "❌ VITE_API_URL is missing."
           );
 
           return null;
@@ -863,7 +1041,7 @@ function Chatbot() {
     };
 
   /* =======================================================
-     SEND MESSAGE
+     SEND NORMAL CHAT MESSAGE
   ======================================================= */
 
   const sendMessage =
@@ -880,18 +1058,25 @@ function Chatbot() {
         return;
       }
 
+      /* ================================================
+         USER MESSAGE
+      ================================================ */
+
       setMessages(
         (prev) => [
           ...prev,
           {
             id:
-              Date.now(),
+              `user-${Date.now()}-${Math.random()}`,
 
             sender:
               "user",
 
             text:
               message,
+
+            type:
+              "user-message",
           },
         ]
       );
@@ -903,6 +1088,12 @@ function Chatbot() {
       );
 
       try {
+        if (!API_URL) {
+          throw new Error(
+            "VITE_API_URL is missing."
+          );
+        }
+
         const response =
           await fetch(
             `${API_URL}/api/chat`,
@@ -931,25 +1122,33 @@ function Chatbot() {
         const data =
           await response.json();
 
+        /* ==============================================
+           DIRECT API RESPONSE
+        ============================================== */
+
         if (
           !isPusherConnected &&
           data?.reply
         ) {
-          setIsTyping(false);
+          setIsTyping(
+            false
+          );
 
           setMessages(
             (prev) => [
               ...prev,
               {
                 id:
-                  Date.now() +
-                  Math.random(),
+                  `bot-${Date.now()}-${Math.random()}`,
 
                 sender:
                   "bot",
 
                 text:
                   data.reply,
+
+                type:
+                  "ai-response",
               },
             ]
           );
@@ -962,15 +1161,16 @@ function Chatbot() {
 
         setTimeout(
           () => {
-            setIsTyping(false);
+            setIsTyping(
+              false
+            );
 
             setMessages(
               (prev) => [
                 ...prev,
                 {
                   id:
-                    Date.now() +
-                    Math.random(),
+                    `fallback-${Date.now()}-${Math.random()}`,
 
                   sender:
                     "bot",
@@ -979,6 +1179,9 @@ function Chatbot() {
                     getBotReply(
                       message
                     ),
+
+                  type:
+                    "fallback",
                 },
               ]
             );
@@ -1028,12 +1231,7 @@ function Chatbot() {
       setIsOpen(
         false
       );
-      
     };
-
-   
-
-    
 
   /* =======================================================
      UI
@@ -1064,7 +1262,7 @@ function Chatbot() {
         <i className="fas fa-robot"></i>
 
         {/* =================================================
-            NOTIFICATION COUNT
+            NOTIFICATION BADGE
         ================================================= */}
 
         <AnimatePresence>
@@ -1188,7 +1386,11 @@ function Chatbot() {
                 </div>
               </div>
 
-              {/* <button
+              {/* =================================================
+                  CLOSE BUTTON
+              ================================================= */}
+
+              <button
                 type="button"
                 className="chatbot-close"
                 onClick={
@@ -1196,8 +1398,8 @@ function Chatbot() {
                 }
                 aria-label="Close chatbot"
               >
-                <i className="fas fa-times"></i>
-              </button> */}
+                <i className="fas fa-xmark"></i>
+              </button>
             </div>
 
             {/* =================================================
@@ -1205,6 +1407,10 @@ function Chatbot() {
             ================================================= */}
 
             <div className="chatbot-body">
+              {/* =================================================
+                  WELCOME
+              ================================================= */}
+
               <div className="chatbot-welcome">
                 <div className="welcome-icon">
                   <i className="fas fa-sparkles"></i>
@@ -1224,6 +1430,10 @@ function Chatbot() {
                 </div>
               </div>
 
+              {/* =================================================
+                  MESSAGES
+              ================================================= */}
+
               <div className="chatbot-messages">
                 {messages.map(
                   (message) => (
@@ -1236,6 +1446,11 @@ function Chatbot() {
                         "user"
                           ? "user-message"
                           : "bot-message"
+                      } ${
+                        message.type ===
+                        "portfolio-update"
+                          ? "portfolio-message"
+                          : ""
                       }`}
                       initial={{
                         opacity: 0,
@@ -1252,6 +1467,10 @@ function Chatbot() {
                           0.25,
                       }}
                     >
+                      {/* =====================================
+                          BOT AVATAR
+                      ===================================== */}
+
                       {message.sender ===
                         "bot" && (
                         <div className="message-avatar">
@@ -1260,7 +1479,13 @@ function Chatbot() {
                       )}
 
                       <div className="message-bubble">
-                        <div className="message-content">
+                        <div
+                          className="message-content"
+                          style={{
+                            whiteSpace:
+                              "pre-line",
+                          }}
+                        >
                           {message.text}
                         </div>
 
@@ -1268,12 +1493,19 @@ function Chatbot() {
                           {message.sender ===
                           "user"
                             ? "You"
+                            : message.type ===
+                              "portfolio-update"
+                            ? "Portfolio Update"
                             : "Assistant"}
                         </span>
                       </div>
                     </motion.div>
                   )
                 )}
+
+                {/* =================================================
+                    TYPING
+                ================================================= */}
 
                 {isTyping && (
                   <motion.div
@@ -1306,11 +1538,16 @@ function Chatbot() {
                 />
               </div>
 
+              {/* =================================================
+                  QUICK QUESTIONS
+              ================================================= */}
+
               {messages.length <=
                 1 && (
                 <div className="quick-questions">
                   <div className="quick-title">
                     <i className="fas fa-bolt"></i>
+
                     Quick questions
                   </div>
 
@@ -1340,6 +1577,69 @@ function Chatbot() {
                   </div>
                 </div>
               )}
+
+              {/* =================================================
+                  TEST PORTFOLIO UPDATE
+                  
+                  IMPORTANT:
+                  REMOVE THIS BLOCK IN PRODUCTION.
+              ================================================= */}
+
+              <div
+                style={{
+                  marginTop:
+                    "16px",
+
+                  padding:
+                    "10px",
+
+                  border:
+                    "1px dashed rgba(34, 197, 94, 0.35)",
+
+                  borderRadius:
+                    "12px",
+                }}
+              >
+                {/* <button
+                  type="button"
+                  onClick={
+                    handleTestPortfolioUpdate
+                  }
+                  disabled={
+                    isSendingUpdate
+                  }
+                  style={{
+                    width:
+                      "100%",
+
+                    border:
+                      "none",
+
+                    borderRadius:
+                      "10px",
+
+                    padding:
+                      "10px 14px",
+
+                    cursor:
+                      isSendingUpdate
+                        ? "not-allowed"
+                        : "pointer",
+
+                    opacity:
+                      isSendingUpdate
+                        ? 0.6
+                        : 1,
+
+                    fontWeight:
+                      600,
+                  }}
+                >
+                  {isSendingUpdate
+                    ? "Sending Update..."
+                    : "🚀 Test Portfolio Update"}
+                </button> */}
+              </div>
             </div>
 
             {/* =================================================
@@ -1415,9 +1715,14 @@ function Chatbot() {
                 </button>
               </div>
 
+              {/* =================================================
+                  POWERED
+              ================================================= */}
+
               <div className="chatbot-powered">
                 <span>
                   <i className="fas fa-shield-halved"></i>
+
                   Secure Portfolio Assistant
                 </span>
 
@@ -1438,5 +1743,4 @@ function Chatbot() {
 }
 
 export default Chatbot;
-
 

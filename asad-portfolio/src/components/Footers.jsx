@@ -439,7 +439,7 @@ const closeChatbot = () => {
             MESSAGE
         ================================================= */}
 
-       <motion.a
+        <motion.a
   href="mailto:crypton.futuremedia1989@gmail.com"
   className="premium-float-btn premium-message"
   aria-label="Send Message"
@@ -453,21 +453,16 @@ const closeChatbot = () => {
     scale: 0.94,
   }}
 >
-  {/* Animated Glow */}
   <span className="premium-btn-glow"></span>
 
-  {/* Pulse Ring */}
   <span className="message-pulse-ring"></span>
 
-  {/* Main Button */}
   <span className="premium-btn-inner">
     <i className="fas fa-comment-dots"></i>
   </span>
 
-  {/* Notification Dot */}
   <span className="message-notification-dot"></span>
 
-  {/* Tooltip */}
   <span className="premium-float-tooltip">
     <strong>
       Send Message
@@ -477,7 +472,7 @@ const closeChatbot = () => {
       Let's connect
     </small>
   </span>
-</motion.a>
+</motion.a> 
 
 
         {/* =================================================

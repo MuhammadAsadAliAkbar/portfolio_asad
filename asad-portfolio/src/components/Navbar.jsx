@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import "../css/Navbar.css";
 
@@ -26,8 +27,15 @@ function Navbar() {
   useEffect(() => {
     const theme = darkMode ? "dark" : "light";
 
-    document.documentElement.setAttribute("data-theme", theme);
-    document.body.setAttribute("data-theme", theme);
+    document.documentElement.setAttribute(
+      "data-theme",
+      theme
+    );
+
+    document.body.setAttribute(
+      "data-theme",
+      theme
+    );
 
     localStorage.setItem("theme", theme);
   }, [darkMode]);
@@ -42,20 +50,26 @@ function Navbar() {
         .map(([id]) => document.getElementById(id))
         .filter(Boolean);
 
-      const current = sections.reduce((currentSection, section) => {
-        const top = Math.abs(
-          section.getBoundingClientRect().top - 120
-        );
+      const current = sections.reduce(
+        (currentSection, section) => {
+          const top = Math.abs(
+            section.getBoundingClientRect().top - 120
+          );
 
-        if (!currentSection || top < currentSection.distance) {
-          return {
-            id: section.id,
-            distance: top,
-          };
-        }
+          if (
+            !currentSection ||
+            top < currentSection.distance
+          ) {
+            return {
+              id: section.id,
+              distance: top,
+            };
+          }
 
-        return currentSection;
-      }, null);
+          return currentSection;
+        },
+        null
+      );
 
       if (current) {
         setActive(current.id);
@@ -69,20 +83,45 @@ function Navbar() {
     });
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener(
+        "scroll",
+        handleScroll
+      );
     };
   }, []);
 
   /* ================= SCROLL TO ================= */
 
   const scrollTo = (id) => {
-    document.getElementById(id)?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
+    document
+      .getElementById(id)
+      ?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
 
     setActive(id);
     setMenuOpen(false);
+  };
+
+  /* ================= LOGIN ================= */
+
+  const handleLogin = () => {
+    setMenuOpen(false);
+
+    window.dispatchEvent(
+      new CustomEvent("open-login")
+    );
+  };
+
+  /* ================= SIGN UP ================= */
+
+  const handleSignup = () => {
+    setMenuOpen(false);
+
+    window.dispatchEvent(
+      new CustomEvent("open-signup")
+    );
   };
 
   return (
@@ -93,8 +132,12 @@ function Navbar() {
     >
       <div className="nav-container">
 
-        {/* LOGO */}
+        {/* =================================================
+            LOGO
+        ================================================= */}
+
         <button
+          type="button"
           className="logo"
           onClick={() => scrollTo("home")}
           aria-label="Muhammad Asad Ali Akbar"
@@ -105,7 +148,10 @@ function Navbar() {
           </span>
         </button>
 
-        {/* NAV LINKS */}
+        {/* =================================================
+            NAV LINKS
+        ================================================= */}
+
         <nav
           className={`nav-links ${
             menuOpen ? "open" : ""
@@ -113,24 +159,85 @@ function Navbar() {
         >
           {links.map(([id, label]) => (
             <button
+              type="button"
               key={id}
-              className={active === id ? "active" : ""}
+              className={
+                active === id ? "active" : ""
+              }
               onClick={() => scrollTo(id)}
             >
               <span>{label}</span>
             </button>
           ))}
+
+          {/* =================================================
+              MOBILE AUTH
+              Only shown when mobile menu is open
+          ================================================= */}
+
+          <div className="mobile-auth-actions">
+            <button
+              type="button"
+              className="nav-login-btn"
+              onClick={handleLogin}
+            >
+              <i className="fas fa-right-to-bracket" />
+              <span>Login</span>
+            </button>
+
+            <button
+              type="button"
+              className="nav-signup-btn"
+              onClick={handleSignup}
+            >
+              <i className="fas fa-user-plus" />
+              <span>Sign Up</span>
+            </button>
+          </div>
         </nav>
 
-        {/* ACTIONS */}
+        {/* =================================================
+            RIGHT ACTIONS
+        ================================================= */}
+
         <div className="nav-actions">
 
-          {/* THEME TOGGLE */}
+          {/* =================================================
+              DESKTOP AUTH
+          ================================================= */}
+
+          <div className="desktop-auth-actions">
+            <button
+              type="button"
+              className="nav-login-btn"
+              onClick={handleLogin}
+            >
+              <i className="fas fa-right-to-bracket" />
+              <span>Login</span>
+            </button>
+
+            <button
+              type="button"
+              className="nav-signup-btn"
+              onClick={handleSignup}
+            >
+              <i className="fas fa-user-plus" />
+              <span>Sign Up</span>
+            </button>
+          </div>
+
+          {/* =================================================
+              THEME TOGGLE
+          ================================================= */}
+
           <button
+            type="button"
             className={`theme-toggle ${
               darkMode ? "dark" : "light"
             }`}
-            onClick={() => setDarkMode((value) => !value)}
+            onClick={() =>
+              setDarkMode((value) => !value)
+            }
             aria-label={
               darkMode
                 ? "Switch to light mode"
@@ -152,8 +259,12 @@ function Navbar() {
             </span>
           </button>
 
-          {/* MOBILE MENU */}
+          {/* =================================================
+              MOBILE MENU
+          ================================================= */}
+
           <button
+            type="button"
             className={`menu-btn ${
               menuOpen ? "menu-open" : ""
             }`}
@@ -175,3 +286,5 @@ function Navbar() {
 }
 
 export default Navbar;
+
+
