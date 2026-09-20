@@ -1,5 +1,16 @@
-import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
+import {
+  motion,
+  AnimatePresence,
+} from "framer-motion";
+
 import Pusher from "pusher-js";
 
 import "../css/MessageChat.css";
@@ -8,21 +19,25 @@ import "../css/MessageChat.css";
    CONFIG
 ========================================================= */
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL =
+  import.meta.env.VITE_API_URL;
 
-const PUSHER_KEY = import.meta.env.VITE_PUSHER_KEY;
+const PUSHER_KEY =
+  import.meta.env.VITE_PUSHER_KEY;
 
 const PUSHER_CLUSTER =
-  import.meta.env.VITE_PUSHER_CLUSTER || "ap2";
+  import.meta.env.VITE_PUSHER_CLUSTER ||
+  "ap2";
 
 /* =========================================================
    VISITOR ID
 ========================================================= */
 
 const getVisitorId = () => {
-  let visitorId = localStorage.getItem(
-    "portfolio_visitor_id"
-  );
+  let visitorId =
+    localStorage.getItem(
+      "portfolio_visitor_id"
+    );
 
   if (!visitorId) {
     visitorId =
@@ -48,15 +63,20 @@ function MessageChat() {
      STATE
   ======================================================= */
 
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] =
+    useState(false);
 
-  const [message, setMessage] = useState("");
+  const [message, setMessage] =
+    useState("");
 
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] =
+    useState([]);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] =
+    useState(false);
 
-  const [isSending, setIsSending] = useState(false);
+  const [isSending, setIsSending] =
+    useState(false);
 
   const [connectionStatus, setConnectionStatus] =
     useState("connecting");
@@ -65,606 +85,622 @@ function MessageChat() {
      REFS
   ======================================================= */
 
-  const messagesEndRef = useRef(null);
+  const messagesEndRef =
+    useRef(null);
 
-  const pusherRef = useRef(null);
+  const pusherRef =
+    useRef(null);
 
-  const channelRef = useRef(null);
+  const channelRef =
+    useRef(null);
 
-  const visitorId = useRef(getVisitorId()).current;
+  /*
+    Keep visitor ID stable
+    for the entire browser session.
+  */
 
-  /* =======================================================
-     CONVERSATION ID
-  ======================================================= */
+  const visitorId =
+    useRef(
+      getVisitorId()
+    ).current;
+
+  /*
+    Every visitor gets a unique conversation.
+  */
 
   const conversationId =
     `portfolio-${visitorId}`;
 
   /* =========================================================
-     SCROLL TO BOTTOM
+     SCROLL
   ========================================================= */
 
-  const scrollToBottom = (smooth = true) => {
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({
-        behavior: smooth ? "smooth" : "auto",
-        block: "end",
-      });
-    }, 100);
-  };
+  const scrollToBottom =
+    useCallback(
+      (smooth = true) => {
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView(
+            {
+              behavior: smooth
+                ? "smooth"
+                : "auto",
+              block: "end",
+            }
+          );
+        }, 100);
+      },
+      []
+    );
 
   /* =========================================================
-     OPEN MESSAGE CHAT EVENT
+     OPEN CHAT EVENT
   ========================================================= */
 
   useEffect(() => {
-    const handleOpenMessageChat = () => {
-      console.log("💬 Opening Message Chat");
+    const handleOpen =
+      () => {
+        console.log(
+          "💬 Opening one-to-one chat"
+        );
 
-      setIsOpen(true);
-    };
+        setIsOpen(true);
+      };
 
     window.addEventListener(
       "open-message-chat",
-      handleOpenMessageChat
+      handleOpen
     );
 
     return () => {
       window.removeEventListener(
         "open-message-chat",
-        handleOpenMessageChat
+        handleOpen
       );
     };
   }, []);
 
   /* =========================================================
-     CLOSE MESSAGE CHAT
+     CLOSE CHAT
   ========================================================= */
 
-  const closeMessageChat = () => {
+  const closeChat = () => {
     setIsOpen(false);
   };
 
   /* =========================================================
-     FORMAT API MESSAGE
+     FORMAT MESSAGE
   ========================================================= */
 
-  const formatMessage = (item, index) => {
-    return {
-      id:
-        item.messageId ||
-        item._id ||
-        `message-${index}-${Date.now()}`,
+  const formatMessage =
+    useCallback(
+      (item, index = 0) => {
+        return {
+          id:
+            item.messageId ||
+            item._id ||
+            `message-${index}-${Date.now()}`,
 
-      sender:
-        item.senderType === "visitor"
-          ? "user"
-          : "admin",
+          sender:
+            item.senderType ===
+            "visitor"
+              ? "user"
+              : "admin",
 
-      senderName:
-        item.senderName ||
-        "Unknown",
+          senderType:
+            item.senderType,
 
-      text:
-        item.message ||
-        "",
+          senderId:
+            item.senderId,
 
-      createdAt:
-        item.createdAt ||
-        null,
-    };
-  };
+          senderName:
+            item.senderName ||
+            "Unknown",
 
-  /* =========================================================
-     LOAD MESSAGES FROM MONGODB
-  ========================================================= */
+          text:
+            item.message ||
+            "",
 
-  const loadMessages = async () => {
-    if (!API_URL) {
-      console.error(
-        "❌ VITE_API_URL is not configured."
-      );
-
-      setConnectionStatus("error");
-
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-
-      const url =
-        `${API_URL}/api/messages/${encodeURIComponent(
-          conversationId
-        )}`;
-
-      console.log(
-        "=========================================="
-      );
-
-      console.log(
-        "📥 LOADING MESSAGES FROM MONGODB"
-      );
-
-      console.log(
-        "🔗 URL:",
-        url
-      );
-
-      console.log(
-        "🆔 Conversation ID:",
-        conversationId
-      );
-
-      console.log(
-        "👤 Visitor ID:",
-        visitorId
-      );
-
-      console.log(
-        "=========================================="
-      );
-
-      /* =====================================================
-         GET REQUEST
-      ===================================================== */
-
-      const response = await fetch(url, {
-        method: "GET",
-
-        headers: {
-          Accept: "application/json",
-        },
-      });
-
-      console.log(
-        "📡 HTTP Status:",
-        response.status
-      );
-
-      /* =====================================================
-         RESPONSE TEXT
-      ===================================================== */
-
-      const rawText =
-        await response.text();
-
-      console.log(
-        "📥 RAW API RESPONSE:",
-        rawText
-      );
-
-      /* =====================================================
-         PARSE JSON
-      ===================================================== */
-
-      let data;
-
-      try {
-        data = JSON.parse(rawText);
-      } catch (jsonError) {
-        console.error(
-          "❌ Invalid JSON response:",
-          jsonError
-        );
-
-        throw new Error(
-          "Server returned invalid JSON response."
-        );
-      }
-
-      console.log(
-        "📦 PARSED API RESPONSE:",
-        data
-      );
-
-      /* =====================================================
-         HTTP ERROR
-      ===================================================== */
-
-      if (!response.ok) {
-        throw new Error(
-          data?.message ||
-            `Failed to load messages (${response.status})`
-        );
-      }
-
-      /* =====================================================
-         CHECK SUCCESS
-      ===================================================== */
-
-      if (data?.success === false) {
-        throw new Error(
-          data?.message ||
-            "API returned success=false"
-        );
-      }
-
-      /* =====================================================
-         GET MESSAGES
-      ===================================================== */
-
-      let apiMessages = [];
-
-      if (Array.isArray(data?.messages)) {
-        apiMessages = data.messages;
-      } else if (Array.isArray(data?.data)) {
-        apiMessages = data.data;
-      } else if (Array.isArray(data)) {
-        apiMessages = data;
-      }
-
-      console.log(
-        "📨 TOTAL MESSAGES:",
-        apiMessages.length
-      );
-
-      console.log(
-        "📨 API MESSAGES:",
-        apiMessages
-      );
-
-      /* =====================================================
-         FORMAT MESSAGES
-      ===================================================== */
-
-      const formattedMessages =
-        apiMessages.map(
-          (item, index) =>
-            formatMessage(
-              item,
-              index
-            )
-        );
-
-      console.log(
-        "💬 FORMATTED CHAT MESSAGES:",
-        formattedMessages
-      );
-
-      /* =====================================================
-         SET STATE
-      ===================================================== */
-
-      setMessages(
-        formattedMessages
-      );
-
-      /* =====================================================
-         SCROLL TO LAST MESSAGE
-      ===================================================== */
-
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({
-          behavior: "auto",
-          block: "end",
-        });
-      }, 200);
-
-      console.log(
-        "✅ MongoDB messages loaded successfully."
-      );
-
-    } catch (error) {
-      console.error(
-        "❌ LOAD MESSAGES ERROR:",
-        error
-      );
-
-      /*
-        Existing messages ko clear nahi karenge
-        agar API temporarily fail ho.
-      */
-
-      setConnectionStatus(
-        "error"
-      );
-
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  /* =========================================================
-     ADD MESSAGE WITHOUT DUPLICATE
-  ========================================================= */
-
-  const addMessage = (
-    incomingMessage
-  ) => {
-    if (
-      !incomingMessage ||
-      !incomingMessage.id
-    ) {
-      return;
-    }
-
-    setMessages(
-      (previousMessages) => {
-
-        const alreadyExists =
-          previousMessages.some(
-            (item) =>
-              item.id ===
-              incomingMessage.id
-          );
-
-        if (alreadyExists) {
-          console.log(
-            "⚠️ Duplicate message ignored:",
-            incomingMessage.id
-          );
-
-          return previousMessages;
-        }
-
-        console.log(
-          "➕ Adding message:",
-          incomingMessage
-        );
-
-        return [
-          ...previousMessages,
-          incomingMessage,
-        ];
-      }
+          createdAt:
+            item.createdAt ||
+            null,
+        };
+      },
+      []
     );
 
-    scrollToBottom(true);
-  };
+  /* =========================================================
+     LOAD CONVERSATION
+  ========================================================= */
+
+  const loadMessages =
+    useCallback(
+      async () => {
+        if (!API_URL) {
+          console.error(
+            "❌ VITE_API_URL missing"
+          );
+
+          setConnectionStatus(
+            "error"
+          );
+
+          return;
+        }
+
+        try {
+          setIsLoading(true);
+
+          const url =
+            `${API_URL}/api/messages/${encodeURIComponent(
+              conversationId
+            )}`;
+
+          console.log(
+            "================================="
+          );
+
+          console.log(
+            "📥 ONE-TO-ONE CHAT LOAD"
+          );
+
+          console.log(
+            "🆔 Visitor:",
+            visitorId
+          );
+
+          console.log(
+            "💬 Conversation:",
+            conversationId
+          );
+
+          console.log(
+            "🔗 URL:",
+            url
+          );
+
+          console.log(
+            "================================="
+          );
+
+          /* =================================================
+             GET MESSAGES
+          ================================================= */
+
+          const response =
+            await fetch(url, {
+              method: "GET",
+
+              headers: {
+                Accept:
+                  "application/json",
+              },
+            });
+
+          const data =
+            await response.json();
+
+          console.log(
+            "📦 MongoDB response:",
+            data
+          );
+
+          if (!response.ok) {
+            throw new Error(
+              data?.message ||
+                "Failed to load conversation"
+            );
+          }
+
+          /*
+            Expected:
+            {
+              success: true,
+              messages: [...]
+            }
+          */
+
+          const serverMessages =
+            Array.isArray(
+              data?.messages
+            )
+              ? data.messages
+              : [];
+
+          /* =================================================
+             IMPORTANT:
+             Only current conversation
+          ================================================= */
+
+          const currentConversationMessages =
+            serverMessages.filter(
+              (item) =>
+                String(
+                  item.conversationId
+                ) ===
+                String(
+                  conversationId
+                )
+            );
+
+          console.log(
+            "📨 Messages found:",
+            currentConversationMessages.length
+          );
+
+          /* =================================================
+             FORMAT
+          ================================================= */
+
+          const formattedMessages =
+            currentConversationMessages.map(
+              formatMessage
+            );
+
+          console.log(
+            "💬 Chat messages:",
+            formattedMessages
+          );
+
+          /* =================================================
+             SET CHAT
+          ================================================= */
+
+          setMessages(
+            formattedMessages
+          );
+
+          /* =================================================
+             SCROLL
+          ================================================= */
+
+          setTimeout(() => {
+            messagesEndRef.current?.scrollIntoView(
+              {
+                behavior: "auto",
+                block: "end",
+              }
+            );
+          }, 150);
+
+        } catch (error) {
+          console.error(
+            "❌ Load conversation error:",
+            error
+          );
+
+          setConnectionStatus(
+            "error"
+          );
+
+        } finally {
+          setIsLoading(false);
+        }
+      },
+      [
+        conversationId,
+        visitorId,
+        formatMessage,
+      ]
+    );
+
+  /* =========================================================
+     ADD MESSAGE
+  ========================================================= */
+
+  const addMessage =
+    useCallback(
+      (incomingMessage) => {
+        if (
+          !incomingMessage ||
+          !incomingMessage.id
+        ) {
+          return;
+        }
+
+        /*
+          Make sure message belongs
+          to this conversation.
+        */
+
+        if (
+          incomingMessage.conversationId &&
+          incomingMessage.conversationId !==
+            conversationId
+        ) {
+          console.log(
+            "🚫 Message belongs to another conversation"
+          );
+
+          return;
+        }
+
+        setMessages(
+          (previousMessages) => {
+            const exists =
+              previousMessages.some(
+                (item) =>
+                  item.id ===
+                  incomingMessage.id
+              );
+
+            if (exists) {
+              console.log(
+                "⚠️ Duplicate message ignored:",
+                incomingMessage.id
+              );
+
+              return previousMessages;
+            }
+
+            return [
+              ...previousMessages,
+              incomingMessage,
+            ];
+          }
+        );
+
+        scrollToBottom(true);
+      },
+      [
+        conversationId,
+        scrollToBottom,
+      ]
+    );
 
   /* =========================================================
      CONNECT PUSHER
   ========================================================= */
 
-  const connectPusher = () => {
-    if (!PUSHER_KEY) {
-      console.error(
-        "❌ VITE_PUSHER_KEY is not configured."
-      );
-
-      setConnectionStatus(
-        "error"
-      );
-
-      return;
-    }
-
-    if (!API_URL) {
-      console.error(
-        "❌ VITE_API_URL is not configured."
-      );
-
-      setConnectionStatus(
-        "error"
-      );
-
-      return;
-    }
-
-    /* =====================================================
-       ALREADY CONNECTED
-    ===================================================== */
-
-    if (pusherRef.current) {
-      console.log(
-        "ℹ️ Pusher already connected."
-      );
-
-      return;
-    }
-
-    try {
-      setConnectionStatus(
-        "connecting"
-      );
-
-      console.log(
-        "📡 Initializing Pusher..."
-      );
-
-      /* =====================================================
-         CREATE PUSHER
-      ===================================================== */
-
-      const pusher =
-        new Pusher(
-          PUSHER_KEY,
-          {
-            cluster:
-              PUSHER_CLUSTER,
-
-            authEndpoint:
-              `${API_URL}/api/pusher/auth`,
-          }
+  const connectPusher =
+    useCallback(() => {
+      if (!PUSHER_KEY) {
+        console.error(
+          "❌ VITE_PUSHER_KEY missing"
         );
 
-      pusherRef.current =
-        pusher;
+        setConnectionStatus(
+          "error"
+        );
 
-      /* =====================================================
-         CONNECTION EVENTS
-      ===================================================== */
+        return;
+      }
 
-      pusher.connection.bind(
-        "connected",
-        () => {
-          console.log(
-            "🟢 Pusher connected"
+      if (!API_URL) {
+        console.error(
+          "❌ VITE_API_URL missing"
+        );
+
+        setConnectionStatus(
+          "error"
+        );
+
+        return;
+      }
+
+      /*
+        Don't create another Pusher
+        connection.
+      */
+
+      if (pusherRef.current) {
+        console.log(
+          "📡 Pusher already connected"
+        );
+
+        return;
+      }
+
+      try {
+        setConnectionStatus(
+          "connecting"
+        );
+
+        /* =================================================
+           PUSHER
+        ================================================= */
+
+        const pusher =
+          new Pusher(
+            PUSHER_KEY,
+            {
+              cluster:
+                PUSHER_CLUSTER,
+
+              authEndpoint:
+                `${API_URL}/api/pusher/auth`,
+            }
           );
-        }
-      );
 
-      pusher.connection.bind(
-        "disconnected",
-        () => {
-          console.log(
-            "🟠 Pusher disconnected"
-          );
+        pusherRef.current =
+          pusher;
 
-          setConnectionStatus(
-            "connecting"
-          );
-        }
-      );
+        /* =================================================
+           CHANNEL
+        ================================================= */
 
-      pusher.connection.bind(
-        "error",
-        (error) => {
-          console.error(
-            "❌ Pusher connection error:",
-            error
-          );
+        const channelName =
+          `private-chat-${conversationId}`;
 
-          setConnectionStatus(
-            "error"
-          );
-        }
-      );
-
-      /* =====================================================
-         CHANNEL NAME
-      ===================================================== */
-
-      const channelName =
-        `private-chat-${conversationId}`;
-
-      console.log(
-        "📡 Pusher Channel:",
-        channelName
-      );
-
-      /* =====================================================
-         SUBSCRIBE
-      ===================================================== */
-
-      const channel =
-        pusher.subscribe(
+        console.log(
+          "📡 One-to-one Pusher channel:",
           channelName
         );
 
-      channelRef.current =
-        channel;
-
-      /* =====================================================
-         SUBSCRIPTION SUCCESS
-      ===================================================== */
-
-      channel.bind(
-        "pusher:subscription_succeeded",
-        () => {
-          console.log(
-            "🟢 Private chat subscription successful"
+        const channel =
+          pusher.subscribe(
+            channelName
           );
 
-          setConnectionStatus(
-            "online"
-          );
-        }
-      );
+        channelRef.current =
+          channel;
 
-      /* =====================================================
-         SUBSCRIPTION ERROR
-      ===================================================== */
+        /* =================================================
+           CONNECTION
+        ================================================= */
 
-      channel.bind(
-        "pusher:subscription_error",
-        (error) => {
-          console.error(
-            "❌ Pusher subscription error:",
-            error
-          );
+        pusher.connection.bind(
+          "connected",
+          () => {
+            console.log(
+              "🟢 Pusher connected"
+            );
+          }
+        );
 
-          setConnectionStatus(
-            "error"
-          );
-        }
-      );
-
-      /* =====================================================
-         NEW MESSAGE
-      ===================================================== */
-
-      channel.bind(
-        "new-message",
-        (data) => {
-
-          console.log(
-            "=========================================="
-          );
-
-          console.log(
-            "📩 NEW PUSHER MESSAGE"
-          );
-
-          console.log(
-            "📦 Pusher Data:",
-            data
-          );
-
-          console.log(
-            "=========================================="
-          );
-
-          if (
-            !data ||
-            !data.messageId
-          ) {
-            console.warn(
-              "⚠️ Invalid Pusher message."
+        pusher.connection.bind(
+          "disconnected",
+          () => {
+            console.log(
+              "🟠 Pusher disconnected"
             );
 
-            return;
+            setConnectionStatus(
+              "connecting"
+            );
           }
+        );
 
-          /* =================================================
-             CONVERT PUSHER MESSAGE
-          ================================================= */
+        pusher.connection.bind(
+          "error",
+          (error) => {
+            console.error(
+              "❌ Pusher error:",
+              error
+            );
 
-          const incomingMessage = {
-            id:
-              data.messageId,
+            setConnectionStatus(
+              "error"
+            );
+          }
+        );
 
-            sender:
-              data.senderType ===
-              "visitor"
-                ? "user"
-                : "admin",
+        /* =================================================
+           SUBSCRIPTION SUCCESS
+        ================================================= */
 
-            senderName:
-              data.senderName ||
-              "Unknown",
+        channel.bind(
+          "pusher:subscription_succeeded",
+          () => {
+            console.log(
+              "🟢 One-to-one channel connected"
+            );
 
-            text:
-              data.message ||
-              "",
+            setConnectionStatus(
+              "online"
+            );
+          }
+        );
 
-            createdAt:
-              data.createdAt ||
-              new Date().toISOString(),
-          };
+        /* =================================================
+           SUBSCRIPTION ERROR
+        ================================================= */
 
-          /* =================================================
-             ADD TO CHAT
-          ================================================= */
+        channel.bind(
+          "pusher:subscription_error",
+          (error) => {
+            console.error(
+              "❌ Channel subscription error:",
+              error
+            );
 
-          addMessage(
-            incomingMessage
-          );
-        }
-      );
+            setConnectionStatus(
+              "error"
+            );
+          }
+        );
 
-    } catch (error) {
-      console.error(
-        "❌ Pusher initialization error:",
-        error
-      );
+        /* =================================================
+           NEW MESSAGE
+        ================================================= */
 
-      setConnectionStatus(
-        "error"
-      );
-    }
-  };
+        channel.bind(
+          "new-message",
+          (data) => {
+            console.log(
+              "📩 One-to-one message:",
+              data
+            );
+
+            if (
+              !data ||
+              !data.messageId
+            ) {
+              return;
+            }
+
+            /*
+              IMPORTANT:
+              Ignore messages from
+              another conversation.
+            */
+
+            if (
+              data.conversationId !==
+              conversationId
+            ) {
+              console.log(
+                "🚫 Different conversation ignored"
+              );
+
+              return;
+            }
+
+            const incomingMessage =
+              {
+                id:
+                  data.messageId,
+
+                conversationId:
+                  data.conversationId,
+
+                sender:
+                  data.senderType ===
+                  "visitor"
+                    ? "user"
+                    : "admin",
+
+                senderType:
+                  data.senderType,
+
+                senderId:
+                  data.senderId,
+
+                senderName:
+                  data.senderName ||
+                  "Unknown",
+
+                text:
+                  data.message ||
+                  "",
+
+                createdAt:
+                  data.createdAt ||
+                  new Date().toISOString(),
+              };
+
+            addMessage(
+              incomingMessage
+            );
+          }
+        );
+
+      } catch (error) {
+        console.error(
+          "❌ Pusher initialization error:",
+          error
+        );
+
+        setConnectionStatus(
+          "error"
+        );
+      }
+    }, [
+      API_URL,
+      PUSHER_KEY,
+      PUSHER_CLUSTER,
+      conversationId,
+      addMessage,
+    ]);
 
   /* =========================================================
      INITIALIZE CHAT
@@ -675,81 +711,35 @@ function MessageChat() {
       return;
     }
 
-    console.log(
-      "💬 Message Chat opened"
-    );
-
     /*
-      First MongoDB messages load.
+      Load old MongoDB messages.
     */
 
     loadMessages();
 
     /*
-      Then Pusher real-time connection.
+      Connect to this visitor's
+      private Pusher channel.
     */
 
     connectPusher();
 
-  }, [isOpen]);
+  }, [
+    isOpen,
+    loadMessages,
+    connectPusher,
+  ]);
 
   /* =========================================================
-     PUSHER CLEANUP
-  ========================================================= */
-
-  useEffect(() => {
-    return () => {
-      console.log(
-        "🧹 Cleaning Pusher..."
-      );
-
-      try {
-        if (
-          channelRef.current
-        ) {
-          channelRef.current.unbind_all();
-
-          pusherRef.current?.unsubscribe(
-            `private-chat-${conversationId}`
-          );
-        }
-
-        if (
-          pusherRef.current
-        ) {
-          pusherRef.current.disconnect();
-        }
-
-      } catch (error) {
-        console.error(
-          "❌ Pusher cleanup error:",
-          error
-        );
-      }
-
-      channelRef.current =
-        null;
-
-      pusherRef.current =
-        null;
-    };
-  }, [conversationId]);
-
-  /* =========================================================
-     SEND VISITOR MESSAGE
+     SEND MESSAGE
   ========================================================= */
 
   const handleSendMessage =
     async (e) => {
-
       e.preventDefault();
 
       const trimmedMessage =
         message.trim();
-
-      /* =====================================================
-         VALIDATION
-      ===================================================== */
 
       if (!trimmedMessage) {
         return;
@@ -761,24 +751,18 @@ function MessageChat() {
 
       if (!API_URL) {
         console.error(
-          "❌ VITE_API_URL is not configured."
+          "❌ VITE_API_URL missing"
         );
 
         return;
       }
 
       try {
-        setIsSending(
-          true
-        );
+        setIsSending(true);
 
         console.log(
-          "📤 Sending visitor message..."
+          "📤 Sending one-to-one message..."
         );
-
-        /* ===================================================
-           POST REQUEST
-        =================================================== */
 
         const response =
           await fetch(
@@ -796,7 +780,16 @@ function MessageChat() {
 
               body:
                 JSON.stringify({
+                  /*
+                    VERY IMPORTANT:
+                    Same conversation ID
+                  */
+
                   conversationId,
+
+                  /*
+                    Same visitor ID
+                  */
 
                   senderId:
                     visitorId,
@@ -810,76 +803,60 @@ function MessageChat() {
             }
           );
 
-        /* ===================================================
-           RESPONSE
-        =================================================== */
-
         const data =
           await response.json();
 
         console.log(
-          "📦 SEND API RESPONSE:",
+          "📦 Send response:",
           data
         );
 
         if (!response.ok) {
           throw new Error(
             data?.message ||
-              `Failed to send message (${response.status})`
+              "Failed to send message"
           );
         }
 
-        /* ===================================================
-           SUCCESS
-        =================================================== */
-
-        console.log(
-          "✅ Message saved successfully."
-        );
-
         /*
-          Message manually add nahi kar rahe.
+          We don't manually add the
+          message here.
 
           Backend:
-          1. MongoDB mein save karega
-          2. Pusher event trigger karega
-          3. Pusher "new-message" event yahan receive hoga
-          4. addMessage() chatbox mein show karega
+          MongoDB save
+              ↓
+          Pusher broadcast
+              ↓
+          new-message event
+              ↓
+          addMessage()
         */
 
         setMessage("");
 
-        scrollToBottom(
-          true
-        );
+        scrollToBottom(true);
 
       } catch (error) {
-
         console.error(
-          "❌ SEND MESSAGE ERROR:",
+          "❌ Send message error:",
           error
         );
 
       } finally {
-
-        setIsSending(
-          false
-        );
+        setIsSending(false);
       }
     };
 
   /* =========================================================
-     ENTER KEY
+     ENTER
   ========================================================= */
 
   const handleKeyDown =
     (e) => {
-
       if (
         e.key === "Enter" &&
         !e.shiftKey
       ) {
-
         e.preventDefault();
 
         if (
@@ -897,13 +874,11 @@ function MessageChat() {
 
   const formatTime =
     (date) => {
-
       if (!date) {
         return "";
       }
 
       try {
-
         return new Date(
           date
         ).toLocaleTimeString(
@@ -913,7 +888,6 @@ function MessageChat() {
             minute: "2-digit",
           }
         );
-
       } catch {
         return "";
       }
@@ -925,7 +899,6 @@ function MessageChat() {
 
   const getConnectionText =
     () => {
-
       if (
         connectionStatus ===
         "online"
@@ -950,7 +923,6 @@ function MessageChat() {
   return (
     <AnimatePresence>
       {isOpen && (
-
         <motion.div
           className="message-chat-window"
 
@@ -987,9 +959,7 @@ function MessageChat() {
             <div className="message-chat-user">
 
               <div className="message-chat-avatar">
-
                 <i className="fas fa-user"></i>
-
               </div>
 
               <div className="message-chat-user-info">
@@ -1017,21 +987,15 @@ function MessageChat() {
 
             </div>
 
-            {/* =================================================
-                CLOSE
-            ================================================= */}
-
             <button
               type="button"
               className="message-chat-close"
               onClick={
-                closeMessageChat
+                closeChat
               }
               aria-label="Close message chat"
             >
-
               <i className="fas fa-times"></i>
-
             </button>
 
           </div>
@@ -1047,7 +1011,6 @@ function MessageChat() {
             ================================================= */}
 
             {isLoading && (
-
               <div className="message-chat-loading">
 
                 <i className="fas fa-spinner fa-spin"></i>
@@ -1057,16 +1020,14 @@ function MessageChat() {
                 </span>
 
               </div>
-
             )}
 
             {/* =================================================
-                EMPTY CHAT
+                EMPTY
             ================================================= */}
 
             {!isLoading &&
               messages.length === 0 && (
-
                 <div className="message-welcome">
 
                   <div className="message-welcome-icon">
@@ -1087,7 +1048,6 @@ function MessageChat() {
                   </p>
 
                 </div>
-
             )}
 
             {/* =================================================
@@ -1097,71 +1057,63 @@ function MessageChat() {
             <div className="message-list">
 
               {messages.map(
-                (item) => (
+                (item) => {
 
-                  <motion.div
-                    key={item.id}
+                  const isVisitor =
+                    item.senderType ===
+                      "visitor" ||
+                    item.sender ===
+                      "user";
 
-                    className={`message-row ${
-                      item.sender ===
-                      "user"
-                        ? "message-row-user"
-                        : "message-row-admin"
-                    }`}
+                  return (
+                    <motion.div
+                      key={item.id}
 
-                    initial={{
-                      opacity: 0,
-                      y: 8,
-                    }}
-
-                    animate={{
-                      opacity: 1,
-                      y: 0,
-                    }}
-
-                    transition={{
-                      duration: 0.2,
-                    }}
-                  >
-
-                    <div
-                      className={`message-bubble ${
-                        item.sender ===
-                        "user"
-                          ? "message-bubble-user"
-                          : "message-bubble-admin"
+                      className={`message-row ${
+                        isVisitor
+                          ? "message-row-user"
+                          : "message-row-admin"
                       }`}
+
+                      initial={{
+                        opacity: 0,
+                        y: 8,
+                      }}
+
+                      animate={{
+                        opacity: 1,
+                        y: 0,
+                      }}
+
+                      transition={{
+                        duration: 0.2,
+                      }}
                     >
 
-                      {/* =======================================
-                          MESSAGE TEXT
-                      ======================================= */}
+                      <div
+                        className={`message-bubble ${
+                          isVisitor
+                            ? "message-bubble-user"
+                            : "message-bubble-admin"
+                        }`}
+                      >
 
-                      <div className="message-text">
-                        {item.text}
+                        <div className="message-text">
+                          {item.text}
+                        </div>
+
+                        <div className="message-time">
+                          {formatTime(
+                            item.createdAt
+                          )}
+                        </div>
+
                       </div>
 
-                      {/* =======================================
-                          MESSAGE TIME
-                      ======================================= */}
-
-                      <div className="message-time">
-
-                        {formatTime(
-                          item.createdAt
-                        )}
-
-                      </div>
-
-                    </div>
-
-                  </motion.div>
-
-              ))}
-
-              {/* =============================================
-                  SCROLL TARGET
-              ============================================= */}
+                    </motion.div>
+                  );
+                }
+              )}
 
               <div
                 ref={
@@ -1174,7 +1126,7 @@ function MessageChat() {
           </div>
 
           {/* =================================================
-              INPUT AREA
+              INPUT
           ================================================= */}
 
           <form
@@ -1212,10 +1164,6 @@ function MessageChat() {
               }
             />
 
-            {/* =================================================
-                SEND BUTTON
-            ================================================= */}
-
             <button
               type="submit"
 
@@ -1228,13 +1176,9 @@ function MessageChat() {
             >
 
               {isSending ? (
-
                 <i className="fas fa-spinner fa-spin"></i>
-
               ) : (
-
                 <i className="fas fa-paper-plane"></i>
-
               )}
 
             </button>
@@ -1250,16 +1194,16 @@ function MessageChat() {
             <i className="fas fa-shield-alt"></i>
 
             <span>
-              Secure real-time messaging
+              Secure one-to-one messaging
             </span>
 
           </div>
 
         </motion.div>
-
       )}
     </AnimatePresence>
   );
 }
 
 export default MessageChat;
+
