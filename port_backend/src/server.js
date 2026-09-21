@@ -8,6 +8,7 @@ import crypto from "crypto";
 
 import Contact from "./models/Contact.js";
 import Message from "./models/Message.js";
+import authRoutes from "./routes/authRoutes.js";
 
 dotenv.config();
 
@@ -40,6 +41,8 @@ app.use(
     extended: true,
   })
 );
+
+app.use("/api/auth", authRoutes);
 
 /* =========================================================
    MONGODB
