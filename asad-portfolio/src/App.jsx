@@ -20,6 +20,9 @@ import Knowledge from "./components/Knowledge";
 import Chatbot from "./components/Chatbot";
 import ClientAchievements from './components/ClientAchievements'
 import MessageChat from "./components/MessageChat";
+import LoginPopup from './components/Login'
+import SignupPopup from './components/SignupPopup'
+import GoogleMapPremium from './components/GoogleMapPremium'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -39,11 +42,14 @@ function App() {
         <Testimonials />
         <ClientAchievements />
         <Education />
+        <GoogleMapPremium />
         <Contact />
       </main>
       <Footers />
       <Chatbot />
       <MessageChat />
+      <LoginPopup />
+      <SignupPopup />
       {/* <Footer /> */}
    </>
      
