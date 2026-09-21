@@ -30,6 +30,7 @@ export const registerUser = async (req, res) => {
       name,
       email,
       password,
+      confirmPassword,
     } = req.body;
 
     /* =====================================================
@@ -57,11 +58,28 @@ export const registerUser = async (req, res) => {
       });
     }
 
+    if (!confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Please confirm your password.",
+      });
+    }
+
     if (password.length < 6) {
       return res.status(400).json({
         success: false,
-        message:
-          "Password must be at least 6 characters.",
+        message: "Password must be at least 6 characters.",
+      });
+    }
+
+    /* =====================================================
+       CONFIRM PASSWORD
+    ===================================================== */
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Passwords do not match.",
       });
     }
 
@@ -111,6 +129,11 @@ export const registerUser = async (req, res) => {
       12
     );
 
+      const confirmHashedPassword = await bcrypt.hash(
+      confirmPassword,
+      12
+    );
+
     /* =====================================================
        CREATE USER
     ===================================================== */
@@ -119,6 +142,7 @@ export const registerUser = async (req, res) => {
       name: cleanName,
       email: cleanEmail,
       password: hashedPassword,
+      confirmPassword: confirmHashedPassword,
       role: "user",
     });
 
@@ -135,7 +159,6 @@ export const registerUser = async (req, res) => {
     return res.status(201).json({
       success: true,
       message: "Account created successfully.",
-
       token,
 
       user: {
@@ -146,13 +169,14 @@ export const registerUser = async (req, res) => {
         isActive: user.isActive,
       },
     });
-  } catch (error) {
-    console.error(
-      "Register Error:",
-      error
-    );
 
-    /* Mongo duplicate key */
+  } catch (error) {
+    console.error("Register Error:", error);
+
+    /* =====================================================
+       MONGO DUPLICATE KEY
+    ===================================================== */
+
     if (error.code === 11000) {
       return res.status(409).json({
         success: false,
@@ -160,6 +184,10 @@ export const registerUser = async (req, res) => {
           "An account with this email already exists.",
       });
     }
+
+    /* =====================================================
+       SERVER ERROR
+    ===================================================== */
 
     return res.status(500).json({
       success: false,
