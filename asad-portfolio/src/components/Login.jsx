@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -22,12 +21,15 @@ function LoginPopup() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [error, setError] = useState("");
+
   /* =====================================================
      OPEN LOGIN EVENT
   ===================================================== */
 
   useEffect(() => {
     const handleOpenLogin = () => {
+      setError("");
       setIsOpen(true);
     };
 
@@ -52,7 +54,11 @@ function LoginPopup() {
     if (isLoading) return;
 
     setIsOpen(false);
+
+    setEmail("");
+    setPassword("");
     setShowPassword(false);
+    setError("");
   };
 
   /* =====================================================
@@ -61,7 +67,11 @@ function LoginPopup() {
 
   useEffect(() => {
     const handleEscape = (event) => {
-      if (event.key === "Escape" && isOpen) {
+      if (
+        event.key === "Escape" &&
+        isOpen &&
+        !isLoading
+      ) {
         handleClose();
       }
     };
@@ -82,51 +92,127 @@ function LoginPopup() {
   }, [isOpen, isLoading]);
 
   /* =====================================================
-     LOGIN
+     LOGIN API
   ===================================================== */
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!email.trim() || !password.trim()) {
+    setError("");
+
+    /* ===================================================
+       VALIDATION
+    =================================================== */
+
+    if (!email.trim()) {
+      setError("Please enter your email.");
+      return;
+    }
+
+    if (!password) {
+      setError("Please enter your password.");
       return;
     }
 
     try {
       setIsLoading(true);
 
-      /*
-        Yahan apni API call laga sakte hain.
-      */
+      /* =================================================
+         API REQUEST
 
-      console.log("Login Data:", {
-        email: email.trim(),
-        password,
-      });
+         VITE_API_URL:
+         http://localhost:5000/api
 
-      /*
-        Demo delay
-        Isko baad mein API call se replace karna.
-      */
+         Final endpoint:
+         POST /api/auth/login
+      ================================================= */
 
-      await new Promise((resolve) =>
-        setTimeout(resolve, 1200)
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/auth/login`,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            email: email.trim(),
+            password,
+          }),
+        }
       );
 
-      /* Clear form */
+      const data = await response.json();
+
+      /* =================================================
+         API ERROR
+      ================================================= */
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+            "Invalid email or password."
+        );
+      }
+
+      /* =================================================
+         SAVE TOKEN
+      ================================================= */
+
+      localStorage.setItem(
+        "authToken",
+        data.token
+      );
+
+      /* =================================================
+         SAVE USER
+      ================================================= */
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify(data.user)
+      );
+
+      /* =================================================
+         SUCCESS
+      ================================================= */
+
+      console.log(
+        "Login successful:",
+        data
+      );
+
+      /* Notify other components */
+      window.dispatchEvent(
+        new CustomEvent("auth-success", {
+          detail: data.user,
+        })
+      );
+
+      /* =================================================
+         CLEAR FORM
+      ================================================= */
 
       setEmail("");
       setPassword("");
       setShowPassword(false);
+      setError("");
 
-      /* Close popup */
+      /* =================================================
+         CLOSE POPUP
+      ================================================= */
 
       setIsOpen(false);
-
     } catch (error) {
       console.error(
         "Login failed:",
         error
+      );
+
+      setError(
+        error.message ||
+          "Something went wrong. Please try again."
       );
     } finally {
       setIsLoading(false);
@@ -138,11 +224,13 @@ function LoginPopup() {
   ===================================================== */
 
   const handleForgotPassword = () => {
-    console.log("Forgot password clicked");
+    console.log(
+      "Forgot password clicked"
+    );
 
     /*
-      Yahan forgot-password popup/page
-      open kar sakte hain.
+      Yahan baad mein forgot password
+      popup/API connect kar sakte hain.
     */
   };
 
@@ -151,7 +239,14 @@ function LoginPopup() {
   ===================================================== */
 
   const handleCreateAccount = () => {
+    if (isLoading) return;
+
     setIsOpen(false);
+
+    setEmail("");
+    setPassword("");
+    setShowPassword(false);
+    setError("");
 
     window.dispatchEvent(
       new CustomEvent("open-signup")
@@ -245,6 +340,32 @@ function LoginPopup() {
             </div>
 
             {/* =================================================
+                ERROR
+            ================================================= */}
+
+            <AnimatePresence>
+              {error && (
+                <motion.div
+                  className="login-error"
+                  initial={{
+                    opacity: 0,
+                    y: -8,
+                  }}
+                  animate={{
+                    opacity: 1,
+                    y: 0,
+                  }}
+                  exit={{
+                    opacity: 0,
+                    y: -8,
+                  }}
+                >
+                  {error}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* =================================================
                 FORM
             ================================================= */}
 
@@ -270,11 +391,15 @@ function LoginPopup() {
                     type="email"
                     placeholder="Enter your email"
                     value={email}
-                    onChange={(event) =>
+                    onChange={(event) => {
                       setEmail(
                         event.target.value
-                      )
-                    }
+                      );
+
+                      if (error) {
+                        setError("");
+                      }
+                    }}
                     autoComplete="email"
                     required
                   />
@@ -315,11 +440,15 @@ function LoginPopup() {
                     }
                     placeholder="Enter your password"
                     value={password}
-                    onChange={(event) =>
+                    onChange={(event) => {
                       setPassword(
                         event.target.value
-                      )
-                    }
+                      );
+
+                      if (error) {
+                        setError("");
+                      }
+                    }}
                     autoComplete="current-password"
                     required
                   />

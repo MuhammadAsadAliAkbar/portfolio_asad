@@ -1422,3 +1422,636 @@ select {
     height: 42px;
   }
 }
+
+/* =========================================================
+   PROFILE DROPDOWN ONLY
+   Existing Navbar CSS ko touch nahi karta
+========================================================= */
+
+.nav-profile-wrapper {
+  position: relative;
+}
+
+/* =========================================================
+   PROFILE BUTTON
+========================================================= */
+
+.nav-profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  height: 42px;
+  padding: 4px 11px 4px 5px;
+
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.045);
+
+  color: #ffffff;
+
+  cursor: pointer;
+
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
+}
+
+.nav-profile-btn:hover,
+.nav-profile-btn.profile-active {
+  background: rgba(255, 255, 255, 0.075);
+
+  border-color: rgba(59, 130, 246, 0.35);
+
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.18);
+
+  transform: translateY(-1px);
+}
+
+/* =========================================================
+   USER AVATAR
+========================================================= */
+
+.nav-user-avatar {
+  width: 32px;
+  height: 32px;
+
+  min-width: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #2563eb,
+      #7c3aed
+    );
+
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 800;
+
+  box-shadow:
+    0 5px 15px rgba(37, 99, 235, 0.25);
+}
+
+/* =========================================================
+   USER NAME
+========================================================= */
+
+.nav-user-name {
+  max-width: 120px;
+
+  overflow: hidden;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  color: #ffffff;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* =========================================================
+   CHEVRON
+========================================================= */
+
+.nav-profile-btn > i {
+  font-size: 9px;
+
+  color: rgba(255, 255, 255, 0.55);
+
+  transition:
+    transform 0.25s ease;
+}
+
+.nav-profile-btn > i.rotate {
+  transform: rotate(180deg);
+}
+
+/* =========================================================
+   PROFILE DROPDOWN
+========================================================= */
+
+.nav-profile-dropdown {
+  position: absolute;
+
+  top: calc(100% + 12px);
+  right: 0;
+
+  width: 290px;
+
+  padding: 10px;
+
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 17px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(19, 26, 43, 0.98),
+      rgba(9, 14, 26, 0.98)
+    );
+
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.42),
+    0 8px 30px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+
+  transform-origin: top right;
+
+  overflow: hidden;
+}
+
+/* =========================================================
+   DROPDOWN TOP GLOW
+========================================================= */
+
+.nav-profile-dropdown::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: 15%;
+  right: 15%;
+
+  height: 1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(59, 130, 246, 0.9),
+      rgba(124, 58, 237, 0.8),
+      transparent
+    );
+
+  pointer-events: none;
+}
+
+/* =========================================================
+   USER INFO
+========================================================= */
+
+.profile-user-info {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 10px;
+}
+
+/* =========================================================
+   LARGE AVATAR
+========================================================= */
+
+.profile-large-avatar {
+  width: 46px;
+  height: 46px;
+
+  min-width: 46px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 13px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #2563eb,
+      #7c3aed
+    );
+
+  color: #ffffff;
+
+  font-size: 17px;
+  font-weight: 800;
+
+  box-shadow:
+    0 8px 25px rgba(37, 99, 235, 0.28);
+
+  position: relative;
+  overflow: hidden;
+}
+
+/* avatar shine */
+
+.profile-large-avatar::after {
+  content: "";
+
+  position: absolute;
+
+  width: 55px;
+  height: 12px;
+
+  top: -4px;
+  left: -18px;
+
+  background: rgba(255, 255, 255, 0.16);
+
+  transform: rotate(-45deg);
+
+  pointer-events: none;
+}
+
+/* =========================================================
+   USER DETAILS
+========================================================= */
+
+.profile-user-details {
+  min-width: 0;
+
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+}
+
+.profile-user-details strong {
+  display: block;
+
+  overflow: hidden;
+
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 750;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.profile-user-details span {
+  display: block;
+
+  overflow: hidden;
+
+  color: rgba(255, 255, 255, 0.48);
+
+  font-size: 10.5px;
+  font-weight: 500;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* =========================================================
+   DIVIDER
+========================================================= */
+
+.profile-divider {
+  width: 100%;
+  height: 1px;
+
+  margin: 5px 0 8px;
+
+  background:
+    rgba(255, 255, 255, 0.07);
+}
+
+/* =========================================================
+   MENU ITEM
+========================================================= */
+
+.profile-menu-item {
+  width: 100%;
+
+  min-height: 55px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 11px;
+
+  padding: 9px;
+
+  border: 0;
+  border-radius: 12px;
+
+  background: transparent;
+
+  color: #ffffff;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    background 0.22s ease,
+    transform 0.22s ease;
+}
+
+.profile-menu-item:hover {
+  background:
+    rgba(255, 255, 255, 0.055);
+
+  transform: translateX(2px);
+}
+
+/* =========================================================
+   MENU ICON
+========================================================= */
+
+.profile-menu-icon {
+  width: 36px;
+  height: 36px;
+
+  min-width: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background:
+    rgba(59, 130, 246, 0.10);
+
+  color: #60a5fa;
+
+  font-size: 13px;
+
+  transition:
+    background 0.22s ease,
+    color 0.22s ease,
+    transform 0.22s ease;
+}
+
+.profile-menu-item:hover
+.profile-menu-icon {
+  background:
+    rgba(59, 130, 246, 0.16);
+
+  color: #93c5fd;
+
+  transform: scale(1.04);
+}
+
+/* =========================================================
+   MENU TEXT
+========================================================= */
+
+.profile-menu-item > span:last-child {
+  min-width: 0;
+
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+.profile-menu-item strong {
+  color: #ffffff;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  line-height: 1.2;
+}
+
+.profile-menu-item small {
+  color: rgba(255, 255, 255, 0.42);
+
+  font-size: 10px;
+  font-weight: 500;
+
+  line-height: 1.2;
+}
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+.profile-menu-item.profile-logout {
+  margin-top: 2px;
+}
+
+.profile-menu-item.profile-logout
+.profile-menu-icon {
+  background:
+    rgba(239, 68, 68, 0.08);
+
+  color: #f87171;
+}
+
+.profile-menu-item.profile-logout:hover {
+  background:
+    rgba(239, 68, 68, 0.055);
+}
+
+.profile-menu-item.profile-logout:hover
+.profile-menu-icon {
+  background:
+    rgba(239, 68, 68, 0.14);
+
+  color: #fb7185;
+}
+
+/* =========================================================
+   LIGHT MODE DROPDOWN
+   Sirf dropdown ke light-mode colors
+========================================================= */
+
+html[data-theme="light"]
+.nav-profile-btn,
+body[data-theme="light"]
+.nav-profile-btn {
+  background:
+    rgba(15, 23, 42, 0.035);
+
+  border-color:
+    rgba(15, 23, 42, 0.10);
+
+  color: #1e293b;
+}
+
+html[data-theme="light"]
+.nav-profile-btn:hover,
+body[data-theme="light"]
+.nav-profile-btn:hover,
+
+html[data-theme="light"]
+.nav-profile-btn.profile-active,
+body[data-theme="light"]
+.nav-profile-btn.profile-active {
+  background:
+    rgba(15, 23, 42, 0.06);
+
+  border-color:
+    rgba(37, 99, 235, 0.25);
+
+  box-shadow:
+    0 8px 25px rgba(15, 23, 42, 0.10);
+}
+
+html[data-theme="light"]
+.nav-user-name,
+body[data-theme="light"]
+.nav-user-name {
+  color: #1e293b;
+}
+
+html[data-theme="light"]
+.nav-profile-btn > i,
+body[data-theme="light"]
+.nav-profile-btn > i {
+  color:
+    rgba(15, 23, 42, 0.45);
+}
+
+/* =========================================================
+   LIGHT DROPDOWN
+========================================================= */
+
+html[data-theme="light"]
+.nav-profile-dropdown,
+body[data-theme="light"]
+.nav-profile-dropdown {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.99),
+      rgba(248, 250, 252, 0.99)
+    );
+
+  border-color:
+    rgba(15, 23, 42, 0.10);
+
+  box-shadow:
+    0 25px 70px rgba(15, 23, 42, 0.14),
+    0 8px 25px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* =========================================================
+   LIGHT USER INFO
+========================================================= */
+
+html[data-theme="light"]
+.profile-user-details strong,
+body[data-theme="light"]
+.profile-user-details strong {
+  color: #0f172a;
+}
+
+html[data-theme="light"]
+.profile-user-details span,
+body[data-theme="light"]
+.profile-user-details span {
+  color:
+    rgba(51, 65, 85, 0.60);
+}
+
+html[data-theme="light"]
+.profile-divider,
+body[data-theme="light"]
+.profile-divider {
+  background:
+    rgba(15, 23, 42, 0.08);
+}
+
+/* =========================================================
+   LIGHT MENU ITEMS
+========================================================= */
+
+html[data-theme="light"]
+.profile-menu-item,
+body[data-theme="light"]
+.profile-menu-item {
+  color: #1e293b;
+}
+
+html[data-theme="light"]
+.profile-menu-item:hover,
+body[data-theme="light"]
+.profile-menu-item:hover {
+  background:
+    rgba(15, 23, 42, 0.045);
+}
+
+html[data-theme="light"]
+.profile-menu-item strong,
+body[data-theme="light"]
+.profile-menu-item strong {
+  color: #1e293b;
+}
+
+html[data-theme="light"]
+.profile-menu-item small,
+body[data-theme="light"]
+.profile-menu-item small {
+  color:
+    rgba(51, 65, 85, 0.55);
+}
+
+/* =========================================================
+   LIGHT LOGOUT
+========================================================= */
+
+html[data-theme="light"]
+.profile-menu-item.profile-logout:hover,
+body[data-theme="light"]
+.profile-menu-item.profile-logout:hover {
+  background:
+    rgba(239, 68, 68, 0.055);
+}
+
+/* =========================================================
+   MOBILE
+   Existing mobile navbar ko disturb nahi karega
+========================================================= */
+
+@media (max-width: 850px) {
+
+  .nav-profile-wrapper {
+    display: none;
+  }
+
+}
+
+/* =========================================================
+   DROPDOWN SMALL SCREEN SAFETY
+========================================================= */
+
+@media (max-width: 480px) {
+
+  .nav-profile-dropdown {
+    width: 270px;
+    right: -5px;
+  }
+
+}
+
+/* =========================================================
+   VERY SMALL SCREEN
+========================================================= */
+
+@media (max-width: 360px) {
+
+  .nav-profile-dropdown {
+    width: 250px;
+    right: -8px;
+  }
+
+}

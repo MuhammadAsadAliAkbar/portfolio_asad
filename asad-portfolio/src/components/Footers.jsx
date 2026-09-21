@@ -5,29 +5,149 @@ import "../css/Footer.css";
 function Footers() {
   const currentYear = new Date().getFullYear();
 
+  /* =================================================
+     STATES
+  ================================================= */
+
   const [showBackToTop, setShowBackToTop] = useState(false);
 
-const [isChatbotOpen, setIsChatbotOpen] = useState(false);
+  const [isChatbotOpen, setIsChatbotOpen] = useState(false);
 
-const toggleChatbot = () => {
-  setIsChatbotOpen(prev => {
-    const newState = !prev;
-    
-    if (newState) {
-      openChatbot();   // chatbot open karo
-    } else {
-      closeChatbot();  // chatbot close karo
-    }
-    
-    return newState;
+  /*
+    Message Chat sirf login ke baad show hoga
+  */
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    return !!localStorage.getItem("authToken");
   });
-};
 
-const closeChatbot = () => {
-  window.dispatchEvent(
-    new CustomEvent("close-chatbot")
-  );
-};
+  /* =================================================
+     CHATBOT TOGGLE
+  ================================================= */
+
+  const toggleChatbot = () => {
+    setIsChatbotOpen((prev) => {
+      const newState = !prev;
+
+      if (newState) {
+        openChatbot();
+      } else {
+        closeChatbot();
+      }
+
+      return newState;
+    });
+  };
+
+  /* =================================================
+     OPEN CHATBOT
+  ================================================= */
+
+  const openChatbot = () => {
+    window.dispatchEvent(
+      new CustomEvent("open-chatbot")
+    );
+  };
+
+  /* =================================================
+     CLOSE CHATBOT
+  ================================================= */
+
+  const closeChatbot = () => {
+    window.dispatchEvent(
+      new CustomEvent("close-chatbot")
+    );
+  };
+
+  /* =================================================
+     OPEN MESSAGE CHAT
+  ================================================= */
+
+  const openMessage = () => {
+    window.dispatchEvent(
+      new CustomEvent("open-message-chat")
+    );
+  };
+
+  /* =================================================
+     AUTH STATE
+  ================================================= */
+
+  useEffect(() => {
+    /*
+      LOGIN SUCCESS
+      LoginPopup se event aayega
+    */
+    const handleAuthSuccess = (event) => {
+      console.log(
+        "Footer: User logged in",
+        event.detail
+      );
+
+      setIsLoggedIn(true);
+    };
+
+    /*
+      LOGOUT
+      Navbar se event aayega
+    */
+    const handleAuthLogout = () => {
+      console.log("Footer: User logged out");
+
+      setIsLoggedIn(false);
+
+      /*
+        Agar chatbot open ho to close kar do
+      */
+      setIsChatbotOpen(false);
+    };
+
+    /*
+      Storage change
+      Agar doosri tab/window se login/logout ho
+    */
+    const handleStorage = (event) => {
+      if (
+        event.key === "authToken" ||
+        event.key === "user"
+      ) {
+        setIsLoggedIn(
+          !!localStorage.getItem("authToken")
+        );
+      }
+    };
+
+    window.addEventListener(
+      "auth-success",
+      handleAuthSuccess
+    );
+
+    window.addEventListener(
+      "auth-logout",
+      handleAuthLogout
+    );
+
+    window.addEventListener(
+      "storage",
+      handleStorage
+    );
+
+    return () => {
+      window.removeEventListener(
+        "auth-success",
+        handleAuthSuccess
+      );
+
+      window.removeEventListener(
+        "auth-logout",
+        handleAuthLogout
+      );
+
+      window.removeEventListener(
+        "storage",
+        handleStorage
+      );
+    };
+  }, []);
 
   /* =================================================
      BACK TO TOP
@@ -43,29 +163,19 @@ const closeChatbot = () => {
     });
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener(
+        "scroll",
+        handleScroll
+      );
     };
   }, []);
 
   /* =================================================
-     OPEN CHATBOT EVENT
+     RETURN
   ================================================= */
-
-  const openChatbot = () => {
-    window.dispatchEvent(
-      new CustomEvent("open-chatbot")
-    );
-  };
-
-   const openMessage = () => {
-    window.dispatchEvent(
-      new CustomEvent("open-message-chat")
-    );
-  };
 
   return (
     <footer className="footer">
-
       <div className="container">
 
         {/* =================================================
@@ -115,7 +225,6 @@ const closeChatbot = () => {
               </span>
             </a>
 
-
             {/* DESCRIPTION */}
 
             <p className="footer-description">
@@ -123,7 +232,6 @@ const closeChatbot = () => {
               building modern, scalable and high-performance
               web applications.
             </p>
-
 
             {/* SOCIAL LINKS */}
 
@@ -141,7 +249,6 @@ const closeChatbot = () => {
                 <i className="fab fa-github"></i>
               </a>
 
-
               {/* LINKEDIN */}
 
               <a
@@ -153,7 +260,6 @@ const closeChatbot = () => {
               >
                 <i className="fab fa-linkedin-in"></i>
               </a>
-
 
               {/* EMAIL */}
 
@@ -168,7 +274,6 @@ const closeChatbot = () => {
             </div>
 
           </motion.div>
-
 
           {/* =================================================
               QUICK LINKS
@@ -252,7 +357,6 @@ const closeChatbot = () => {
 
           </motion.div>
 
-
           {/* =================================================
               CONTACT INFO
           ================================================= */}
@@ -280,7 +384,6 @@ const closeChatbot = () => {
               Contact Info
             </h3>
 
-
             {/* EMAIL */}
 
             <div className="footer-contact-item">
@@ -303,7 +406,6 @@ const closeChatbot = () => {
 
             </div>
 
-
             {/* PHONE */}
 
             <div className="footer-contact-item">
@@ -325,7 +427,6 @@ const closeChatbot = () => {
               </div>
 
             </div>
-
 
             {/* LOCATION */}
 
@@ -352,7 +453,6 @@ const closeChatbot = () => {
           </motion.div>
 
         </div>
-
 
         {/* =================================================
             FOOTER BOTTOM
@@ -384,13 +484,11 @@ const closeChatbot = () => {
 
       </div>
 
-
       {/* =================================================
           PREMIUM FLOATING ACTIONS
       ================================================= */}
 
       <div className="premium-floating-actions">
-
 
         {/* =================================================
             WHATSAPP
@@ -415,9 +513,7 @@ const closeChatbot = () => {
           <span className="premium-btn-glow"></span>
 
           <span className="premium-btn-inner">
-
             <i className="fab fa-whatsapp"></i>
-
           </span>
 
           <span className="premium-float-tooltip">
@@ -434,57 +530,70 @@ const closeChatbot = () => {
 
         </motion.a>
 
-
         {/* =================================================
-            MESSAGE
+            MESSAGE CHAT
+            ONLY SHOW WHEN USER IS LOGGED IN
         ================================================= */}
 
-        <motion.a
-  href="mailto:crypton.futuremedia1989@gmail.com"
-  className="premium-float-btn premium-message"
-  aria-label="Send Message"
-  title="Send Message"
-  onClick={openMessage}
-  whileHover={{
-    scale: 1.1,
-    y: -5,
-  }}
-  whileTap={{
-    scale: 0.94,
-  }}
->
-  <span className="premium-btn-glow"></span>
+        {isLoggedIn && (
+          <motion.button
+            type="button"
+            className="premium-float-btn premium-message"
+            aria-label="Open Message Chat"
+            title="Message Chat"
+            onClick={openMessage}
+            whileHover={{
+              scale: 1.1,
+              y: -5,
+            }}
+            whileTap={{
+              scale: 0.94,
+            }}
+          >
 
-  <span className="message-pulse-ring"></span>
+            <span className="premium-btn-glow"></span>
 
-  <span className="premium-btn-inner">
-    <i className="fas fa-comment-dots"></i>
-  </span>
+            <span className="message-pulse-ring"></span>
 
-  <span className="message-notification-dot"></span>
+            <span className="premium-btn-inner">
+              <i className="fas fa-comment-dots"></i>
+            </span>
 
-  <span className="premium-float-tooltip">
-    <strong>
-      Send Message
-    </strong>
+            <span className="message-notification-dot"></span>
 
-    <small>
-      Let's connect
-    </small>
-  </span>
-</motion.a> 
+            <span className="premium-float-tooltip">
 
+              <strong>
+                Message Chat
+              </strong>
+
+              <small>
+                Let's connect
+              </small>
+
+            </span>
+
+          </motion.button>
+        )}
 
         {/* =================================================
             AI CHATBOT
         ================================================= */}
 
-        {/* <motion.button
+        <motion.button
           type="button"
           className="premium-float-btn premium-chatbot"
-          aria-label="Open Chatbot"
-          title="Chatbot"
-          onClick={openChatbot}
+          aria-label={
+            isChatbotOpen
+              ? "Close Chatbot"
+              : "Open Chatbot"
+          }
+          title={
+            isChatbotOpen
+              ? "Close"
+              : "Chatbot"
+          }
+          onClick={toggleChatbot}
           whileHover={{
             scale: 1.08,
             y: -4,
@@ -498,64 +607,41 @@ const closeChatbot = () => {
 
           <span className="premium-btn-inner">
 
-            <i className="fas fa-robot"></i>
+            <i
+              className={`fas ${
+                isChatbotOpen
+                  ? "fa-chevron-down"
+                  : "fa-robot"
+              }`}
+            ></i>
 
           </span>
 
           <span className="premium-float-tooltip">
 
             <strong>
-              AI Assistant
+              {isChatbotOpen
+                ? "Close Assistant"
+                : "AI Assistant"}
             </strong>
 
             <small>
-              Ask me anything
+              {isChatbotOpen
+                ? "Hide chat"
+                : "Ask me anything"}
             </small>
 
           </span>
 
-        </motion.button> */}
-
-<motion.button
-  type="button"
-  className="premium-float-btn premium-chatbot"
-  aria-label={isChatbotOpen ? "Close Chatbot" : "Open Chatbot"}
-  title={isChatbotOpen ? "Close" : "Chatbot"}
-  onClick={toggleChatbot}
-  whileHover={{
-    scale: 1.08,
-    y: -4,
-  }}
-  whileTap={{
-    scale: 0.94,
-  }}
->
-  <span className="premium-btn-glow"></span>
-
-  <span className="premium-btn-inner">
-    <i className={`fas ${isChatbotOpen ? "fa-chevron-down" : "fa-robot"}`}></i>
-  </span>
-
-  <span className="premium-float-tooltip">
-    <strong>
-      {isChatbotOpen ? "Close Assistant" : "AI Assistant"}
-    </strong>
-    <small>
-      {isChatbotOpen ? "Hide chat" : "Ask me anything"}
-    </small>
-  </span>
-</motion.button>
+        </motion.button>
 
       </div>
 
-
       {/* =================================================
-          EXISTING BACK TO TOP
-          UNCHANGED
+          BACK TO TOP
       ================================================= */}
 
       {showBackToTop && (
-
         <motion.a
           href="#home"
           className="back-to-top"
@@ -585,7 +671,6 @@ const closeChatbot = () => {
           <i className="fas fa-arrow-up"></i>
 
         </motion.a>
-
       )}
 
     </footer>

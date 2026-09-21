@@ -1,5 +1,5 @@
-
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import "../css/Navbar.css";
 
 const links = [
@@ -18,11 +18,41 @@ function Navbar() {
   const [active, setActive] = useState("home");
   const [scrolled, setScrolled] = useState(false);
 
+  /* =====================================================
+     THEME
+  ===================================================== */
+
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem("theme") !== "light";
   });
 
-  /* ================= THEME ================= */
+  /* =====================================================
+     AUTH STATE
+  ===================================================== */
+
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem("user");
+      const token = localStorage.getItem("authToken");
+
+      if (savedUser && token) {
+        return JSON.parse(savedUser);
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Failed to load user:", error);
+      return null;
+    }
+  });
+
+  const [profileOpen, setProfileOpen] = useState(false);
+
+  const profileRef = useRef(null);
+
+  /* =====================================================
+     THEME
+  ===================================================== */
 
   useEffect(() => {
     const theme = darkMode ? "dark" : "light";
@@ -40,14 +70,118 @@ function Navbar() {
     localStorage.setItem("theme", theme);
   }, [darkMode]);
 
-  /* ================= SCROLL ================= */
+  /* =====================================================
+     AUTH SUCCESS
+  ===================================================== */
+
+  useEffect(() => {
+    const handleAuthSuccess = (event) => {
+      const loggedInUser = event.detail;
+
+      if (!loggedInUser) {
+        return;
+      }
+
+      setUser(loggedInUser);
+      setProfileOpen(false);
+    };
+
+    window.addEventListener(
+      "auth-success",
+      handleAuthSuccess
+    );
+
+    return () => {
+      window.removeEventListener(
+        "auth-success",
+        handleAuthSuccess
+      );
+    };
+  }, []);
+
+  /* =====================================================
+     AUTH LOGOUT EVENT
+  ===================================================== */
+
+  useEffect(() => {
+    const handleAuthLogout = () => {
+      setUser(null);
+      setProfileOpen(false);
+    };
+
+    window.addEventListener(
+      "auth-logout",
+      handleAuthLogout
+    );
+
+    return () => {
+      window.removeEventListener(
+        "auth-logout",
+        handleAuthLogout
+      );
+    };
+  }, []);
+
+  /* =====================================================
+     AUTH STORAGE SYNC
+  ===================================================== */
+
+  useEffect(() => {
+    const handleStorage = (event) => {
+      if (
+        event.key === "user" ||
+        event.key === "authToken"
+      ) {
+        try {
+          const savedUser =
+            localStorage.getItem("user");
+
+          const token =
+            localStorage.getItem("authToken");
+
+          if (savedUser && token) {
+            setUser(JSON.parse(savedUser));
+          } else {
+            setUser(null);
+            setProfileOpen(false);
+          }
+        } catch (error) {
+          console.error(
+            "Auth storage error:",
+            error
+          );
+
+          setUser(null);
+          setProfileOpen(false);
+        }
+      }
+    };
+
+    window.addEventListener(
+      "storage",
+      handleStorage
+    );
+
+    return () => {
+      window.removeEventListener(
+        "storage",
+        handleStorage
+      );
+    };
+  }, []);
+
+  /* =====================================================
+     SCROLL
+  ===================================================== */
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 35);
 
       const sections = links
-        .map(([id]) => document.getElementById(id))
+        .map(([id]) =>
+          document.getElementById(id)
+        )
         .filter(Boolean);
 
       const current = sections.reduce(
@@ -78,9 +212,13 @@ function Navbar() {
 
     handleScroll();
 
-    window.addEventListener("scroll", handleScroll, {
-      passive: true,
-    });
+    window.addEventListener(
+      "scroll",
+      handleScroll,
+      {
+        passive: true,
+      }
+    );
 
     return () => {
       window.removeEventListener(
@@ -90,7 +228,63 @@ function Navbar() {
     };
   }, []);
 
-  /* ================= SCROLL TO ================= */
+  /* =====================================================
+     CLOSE PROFILE ON OUTSIDE CLICK
+  ===================================================== */
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(event.target)
+      ) {
+        setProfileOpen(false);
+      }
+    };
+
+    if (profileOpen) {
+      document.addEventListener(
+        "mousedown",
+        handleOutsideClick
+      );
+    }
+
+    return () => {
+      document.removeEventListener(
+        "mousedown",
+        handleOutsideClick
+      );
+    };
+  }, [profileOpen]);
+
+  /* =====================================================
+     ESC KEY
+  ===================================================== */
+
+  useEffect(() => {
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        setProfileOpen(false);
+        setMenuOpen(false);
+      }
+    };
+
+    document.addEventListener(
+      "keydown",
+      handleEscape
+    );
+
+    return () => {
+      document.removeEventListener(
+        "keydown",
+        handleEscape
+      );
+    };
+  }, []);
+
+  /* =====================================================
+     SCROLL TO SECTION
+  ===================================================== */
 
   const scrollTo = (id) => {
     document
@@ -104,24 +298,87 @@ function Navbar() {
     setMenuOpen(false);
   };
 
-  /* ================= LOGIN ================= */
+  /* =====================================================
+     LOGIN
+  ===================================================== */
 
   const handleLogin = () => {
     setMenuOpen(false);
+    setProfileOpen(false);
 
     window.dispatchEvent(
       new CustomEvent("open-login")
     );
   };
 
-  /* ================= SIGN UP ================= */
+  /* =====================================================
+     SIGN UP
+  ===================================================== */
 
   const handleSignup = () => {
     setMenuOpen(false);
+    setProfileOpen(false);
 
     window.dispatchEvent(
       new CustomEvent("open-signup")
     );
+  };
+
+  /* =====================================================
+     DASHBOARD
+  ===================================================== */
+
+  const handleDashboard = () => {
+    setProfileOpen(false);
+    setMenuOpen(false);
+
+    window.location.href = "/dashboard";
+  };
+
+  /* =====================================================
+     LOGOUT
+  ===================================================== */
+
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("user");
+
+    setUser(null);
+    setProfileOpen(false);
+    setMenuOpen(false);
+
+    window.dispatchEvent(
+      new CustomEvent("auth-logout")
+    );
+  };
+
+  /* =====================================================
+     USER INITIAL
+  ===================================================== */
+
+  const getUserInitial = () => {
+    if (!user?.name) {
+      return "U";
+    }
+
+    return user.name
+      .trim()
+      .charAt(0)
+      .toUpperCase();
+  };
+
+  /* =====================================================
+     USER DISPLAY NAME
+  ===================================================== */
+
+  const getFirstName = () => {
+    if (!user?.name) {
+      return "User";
+    }
+
+    return user.name
+      .trim()
+      .split(" ")[0];
   };
 
   return (
@@ -143,8 +400,13 @@ function Navbar() {
           aria-label="Muhammad Asad Ali Akbar"
         >
           <span className="ma-logo">
-            <span className="ma-m">M</span>
-            <span className="ma-a">A</span>
+            <span className="ma-m">
+              M
+            </span>
+
+            <span className="ma-a">
+              A
+            </span>
           </span>
         </button>
 
@@ -162,37 +424,114 @@ function Navbar() {
               type="button"
               key={id}
               className={
-                active === id ? "active" : ""
+                active === id
+                  ? "active"
+                  : ""
               }
-              onClick={() => scrollTo(id)}
+              onClick={() =>
+                scrollTo(id)
+              }
             >
-              <span>{label}</span>
+              <span>
+                {label}
+              </span>
             </button>
           ))}
 
           {/* =================================================
               MOBILE AUTH
-              Only shown when mobile menu is open
           ================================================= */}
 
           <div className="mobile-auth-actions">
-            <button
-              type="button"
-              className="nav-login-btn"
-              onClick={handleLogin}
-            >
-              <i className="fas fa-right-to-bracket" />
-              <span>Login</span>
-            </button>
 
-            <button
-              type="button"
-              className="nav-signup-btn"
-              onClick={handleSignup}
-            >
-              <i className="fas fa-user-plus" />
-              <span>Sign Up</span>
-            </button>
+            {!user ? (
+              <>
+                {/* LOGIN */}
+
+                <button
+                  type="button"
+                  className="nav-login-btn"
+                  onClick={handleLogin}
+                >
+                  <i className="fas fa-right-to-bracket" />
+
+                  <span>
+                    Login
+                  </span>
+                </button>
+
+                {/* SIGN UP */}
+
+                <button
+                  type="button"
+                  className="nav-signup-btn"
+                  onClick={handleSignup}
+                >
+                  <i className="fas fa-user-plus" />
+
+                  <span>
+                    Sign Up
+                  </span>
+                </button>
+              </>
+            ) : (
+              <div className="mobile-user-actions">
+
+                {/* USER INFO */}
+
+                <div className="mobile-user-info">
+
+                  <div className="mobile-user-avatar">
+                    {getUserInitial()}
+                  </div>
+
+                  <div>
+                    <strong>
+                      {getFirstName()}
+                    </strong>
+
+                    <span>
+                      {user.email}
+                    </span>
+                  </div>
+
+                </div>
+
+                {/* DASHBOARD */}
+
+                <button
+                  type="button"
+                  className="mobile-dashboard-btn"
+                  onClick={
+                    handleDashboard
+                  }
+                >
+                  <i className="fas fa-chart-line" />
+
+                  <span>
+                    Dashboard
+                  </span>
+                </button>
+
+                {/* LOGOUT */}
+
+                <button
+                  type="button"
+                  className="mobile-logout-btn"
+                  onClick={
+                    handleLogout
+                  }
+                >
+                  <i className="fas fa-right-from-bracket" />
+
+                  <span>
+                    Logout
+                  </span>
+                </button>
+
+              </div>
+            )}
+
           </div>
         </nav>
 
@@ -207,23 +546,217 @@ function Navbar() {
           ================================================= */}
 
           <div className="desktop-auth-actions">
-            <button
-              type="button"
-              className="nav-login-btn"
-              onClick={handleLogin}
-            >
-              <i className="fas fa-right-to-bracket" />
-              <span>Login</span>
-            </button>
 
-            <button
-              type="button"
-              className="nav-signup-btn"
-              onClick={handleSignup}
-            >
-              <i className="fas fa-user-plus" />
-              <span>Sign Up</span>
-            </button>
+            {!user ? (
+              <>
+                {/* LOGIN */}
+
+                <button
+                  type="button"
+                  className="nav-login-btn"
+                  onClick={handleLogin}
+                >
+                  <i className="fas fa-right-to-bracket" />
+
+                  <span>
+                    Login
+                  </span>
+                </button>
+
+                {/* SIGN UP */}
+
+                <button
+                  type="button"
+                  className="nav-signup-btn"
+                  onClick={handleSignup}
+                >
+                  <i className="fas fa-user-plus" />
+
+                  <span>
+                    Sign Up
+                  </span>
+                </button>
+              </>
+            ) : (
+
+              /* =================================================
+                 USER PROFILE
+              ================================================= */
+
+              <div
+                className="nav-profile-wrapper"
+                ref={profileRef}
+              >
+
+                {/* PROFILE BUTTON */}
+
+                <button
+                  type="button"
+                  className={`nav-profile-btn ${
+                    profileOpen
+                      ? "profile-active"
+                      : ""
+                  }`}
+                  onClick={() =>
+                    setProfileOpen(
+                      (value) =>
+                        !value
+                    )
+                  }
+                  aria-label="Open user menu"
+                  aria-expanded={
+                    profileOpen
+                  }
+                >
+
+                  {/* AVATAR */}
+
+                  <span className="nav-user-avatar">
+                    {getUserInitial()}
+                  </span>
+
+                  {/* NAME */}
+
+                  <span className="nav-user-name">
+                    {getFirstName()}
+                  </span>
+
+                  {/* ARROW */}
+
+                  <i
+                    className={`fas fa-chevron-down ${
+                      profileOpen
+                        ? "rotate"
+                        : ""
+                    }`}
+                  />
+
+                </button>
+
+                {/* =================================================
+                    PROFILE DROPDOWN
+                ================================================= */}
+
+                <AnimatePresence>
+                  {profileOpen && (
+                    <motion.div
+                      className="nav-profile-dropdown"
+
+                      initial={{
+                        opacity: 0,
+                        y: -8,
+                        scale: 0.96,
+                      }}
+
+                      animate={{
+                        opacity: 1,
+                        y: 0,
+                        scale: 1,
+                      }}
+
+                      exit={{
+                        opacity: 0,
+                        y: -8,
+                        scale: 0.96,
+                      }}
+
+                      transition={{
+                        duration: 0.18,
+                        ease: "easeOut",
+                      }}
+                    >
+
+                      {/* =================================================
+                          USER INFO
+                      ================================================= */}
+
+                      <div className="profile-user-info">
+
+                        <div className="profile-large-avatar">
+                          {getUserInitial()}
+                        </div>
+
+                        <div className="profile-user-details">
+
+                          <strong>
+                            {user.name}
+                          </strong>
+
+                          <span>
+                            {user.email}
+                          </span>
+
+                        </div>
+
+                      </div>
+
+                      {/* DIVIDER */}
+
+                      <div className="profile-divider" />
+
+                      {/* =================================================
+                          DASHBOARD
+                      ================================================= */}
+
+                      <button
+                        type="button"
+                        className="profile-menu-item"
+                        onClick={
+                          handleDashboard
+                        }
+                      >
+
+                        <span className="profile-menu-icon">
+                          <i className="fas fa-chart-line" />
+                        </span>
+
+                        <span>
+                          <strong>
+                            Dashboard
+                          </strong>
+
+                          <small>
+                            Open your dashboard
+                          </small>
+                        </span>
+
+                      </button>
+
+                      {/* =================================================
+                          LOGOUT
+                      ================================================= */}
+
+                      <button
+                        type="button"
+                        className="profile-menu-item profile-logout"
+                        onClick={
+                          handleLogout
+                        }
+                      >
+
+                        <span className="profile-menu-icon">
+                          <i className="fas fa-right-from-bracket" />
+                        </span>
+
+                        <span>
+                          <strong>
+                            Logout
+                          </strong>
+
+                          <small>
+                            Sign out of your account
+                          </small>
+                        </span>
+
+                      </button>
+
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+              </div>
+            )}
+
           </div>
 
           {/* =================================================
@@ -233,10 +766,15 @@ function Navbar() {
           <button
             type="button"
             className={`theme-toggle ${
-              darkMode ? "dark" : "light"
+              darkMode
+                ? "dark"
+                : "light"
             }`}
             onClick={() =>
-              setDarkMode((value) => !value)
+              setDarkMode(
+                (value) =>
+                  !value
+              )
             }
             aria-label={
               darkMode
@@ -244,7 +782,9 @@ function Navbar() {
                 : "Switch to dark mode"
             }
           >
+
             <span className="theme-track">
+
               <span className="theme-icon sun-icon">
                 ☀
               </span>
@@ -254,9 +794,13 @@ function Navbar() {
               </span>
 
               <span className="theme-thumb">
-                {darkMode ? "☾" : "☀"}
+                {darkMode
+                  ? "☾"
+                  : "☀"}
               </span>
+
             </span>
+
           </button>
 
           {/* =================================================
@@ -266,13 +810,20 @@ function Navbar() {
           <button
             type="button"
             className={`menu-btn ${
-              menuOpen ? "menu-open" : ""
+              menuOpen
+                ? "menu-open"
+                : ""
             }`}
             onClick={() =>
-              setMenuOpen((value) => !value)
+              setMenuOpen(
+                (value) =>
+                  !value
+              )
             }
             aria-label="Toggle navigation"
-            aria-expanded={menuOpen}
+            aria-expanded={
+              menuOpen
+            }
           >
             <span />
             <span />
@@ -286,5 +837,3 @@ function Navbar() {
 }
 
 export default Navbar;
-
-

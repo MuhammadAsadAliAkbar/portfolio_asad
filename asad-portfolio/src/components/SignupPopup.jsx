@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -10,7 +9,6 @@ import {
   EyeOff,
   UserPlus,
   Loader2,
-  CheckCircle2,
 } from "lucide-react";
 
 import "../css/SignupPopup.css";
@@ -21,18 +19,12 @@ function SignupPopup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] =
-    useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [showPassword, setShowPassword] =
-    useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const [showConfirmPassword, setShowConfirmPassword] =
-    useState(false);
-
-  const [isLoading, setIsLoading] =
-    useState(false);
-
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
   /* =====================================================
@@ -45,16 +37,10 @@ function SignupPopup() {
       setIsOpen(true);
     };
 
-    window.addEventListener(
-      "open-signup",
-      handleOpenSignup
-    );
+    window.addEventListener("open-signup", handleOpenSignup);
 
     return () => {
-      window.removeEventListener(
-        "open-signup",
-        handleOpenSignup
-      );
+      window.removeEventListener("open-signup", handleOpenSignup);
     };
   }, []);
 
@@ -74,6 +60,7 @@ function SignupPopup() {
 
     setShowPassword(false);
     setShowConfirmPassword(false);
+
     setError("");
   };
 
@@ -83,27 +70,17 @@ function SignupPopup() {
 
   useEffect(() => {
     const handleEscape = (event) => {
-      if (
-        event.key === "Escape" &&
-        isOpen &&
-        !isLoading
-      ) {
+      if (event.key === "Escape" && isOpen && !isLoading) {
         handleClose();
       }
     };
 
     if (isOpen) {
-      document.addEventListener(
-        "keydown",
-        handleEscape
-      );
+      document.addEventListener("keydown", handleEscape);
     }
 
     return () => {
-      document.removeEventListener(
-        "keydown",
-        handleEscape
-      );
+      document.removeEventListener("keydown", handleEscape);
     };
   }, [isOpen, isLoading]);
 
@@ -115,6 +92,10 @@ function SignupPopup() {
     event.preventDefault();
 
     setError("");
+
+    /* =====================================================
+       FRONTEND VALIDATION
+    ===================================================== */
 
     if (!name.trim()) {
       setError("Please enter your name.");
@@ -132,66 +113,101 @@ function SignupPopup() {
     }
 
     if (password.length < 6) {
-      setError(
-        "Password must be at least 6 characters."
-      );
+      setError("Password must be at least 6 characters.");
       return;
     }
 
     if (password !== confirmPassword) {
-      setError(
-        "Passwords do not match."
-      );
+      setError("Passwords do not match.");
       return;
     }
+
+    /* =====================================================
+       API REGISTER
+    ===================================================== */
 
     try {
       setIsLoading(true);
 
-      /*
-        =====================================================
-        API CALL YAHAN LAGA SAKTE HAIN
-        =====================================================
+      const API_URL = import.meta.env.VITE_API_URL;
 
-        Example:
-
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/auth/register`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              name: name.trim(),
-              email: email.trim(),
-              password,
-            }),
-          }
+      if (!API_URL) {
+        throw new Error(
+          "VITE_API_URL is not configured."
         );
+      }
 
-        const data = await response.json();
+      const response = await fetch(
+        `${API_URL}/api/auth/register`,
+        {
+          method: "POST",
 
-        if (!response.ok) {
-          throw new Error(
-            data.message || "Signup failed"
-          );
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            name: name.trim(),
+            email: email.trim().toLowerCase(),
+            password,
+            confirmPassword
+          }),
         }
-      */
-
-      console.log("Signup Data:", {
-        name: name.trim(),
-        email: email.trim(),
-        password,
-      });
-
-      /* Demo loading */
-
-      await new Promise((resolve) =>
-        setTimeout(resolve, 1200)
       );
 
-      /* Success */
+      const data = await response.json();
+
+      /* =====================================================
+         API ERROR
+      ===================================================== */
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Registration failed."
+        );
+      }
+
+      /* =====================================================
+         SUCCESS
+      ===================================================== */
+
+      console.log("Signup successful:", data);
+
+      /*
+        Backend se token mil raha hai to save kar dein
+      */
+
+      if (data.token) {
+        localStorage.setItem(
+          "authToken",
+          data.token
+        );
+      }
+
+      /*
+        Logged-in user save
+      */
+
+      if (data.user) {
+        localStorage.setItem(
+          "user",
+          JSON.stringify(data.user)
+        );
+      }
+
+      /*
+        App ke dusre components ko inform karein
+      */
+
+      window.dispatchEvent(
+        new CustomEvent("auth-success", {
+          detail: data.user,
+        })
+      );
+
+      /*
+        Form reset
+      */
 
       setName("");
       setEmail("");
@@ -201,13 +217,16 @@ function SignupPopup() {
       setShowPassword(false);
       setShowConfirmPassword(false);
 
+      setError("");
+
+      /*
+        Signup popup close
+      */
+
       setIsOpen(false);
 
     } catch (error) {
-      console.error(
-        "Signup failed:",
-        error
-      );
+      console.error("Signup failed:", error);
 
       setError(
         error.message ||
@@ -223,17 +242,19 @@ function SignupPopup() {
   ===================================================== */
 
   const handleLogin = () => {
+    if (isLoading) return;
+
     setIsOpen(false);
 
     setName("");
     setEmail("");
     setPassword("");
     setConfirmPassword("");
-    setError("");
 
-    /*
-      Login popup open
-    */
+    setShowPassword(false);
+    setShowConfirmPassword(false);
+
+    setError("");
 
     window.dispatchEvent(
       new CustomEvent("open-login")
@@ -260,8 +281,7 @@ function SignupPopup() {
           }}
           onMouseDown={(event) => {
             if (
-              event.target ===
-              event.currentTarget
+              event.target === event.currentTarget
             ) {
               handleClose();
             }
@@ -302,6 +322,7 @@ function SignupPopup() {
               className="signup-close"
               onClick={handleClose}
               aria-label="Close signup"
+              disabled={isLoading}
             >
               <X size={20} />
             </button>
@@ -316,9 +337,7 @@ function SignupPopup() {
               </div>
 
               <div>
-                <h2>
-                  Create Account
-                </h2>
+                <h2>Create Account</h2>
 
                 <p>
                   Join us and get started
@@ -378,12 +397,12 @@ function SignupPopup() {
                     type="text"
                     placeholder="Enter your full name"
                     value={name}
-                    onChange={(event) =>
-                      setName(
-                        event.target.value
-                      )
-                    }
+                    onChange={(event) => {
+                      setName(event.target.value);
+                      setError("");
+                    }}
                     autoComplete="name"
+                    disabled={isLoading}
                     required
                   />
                 </div>
@@ -407,12 +426,12 @@ function SignupPopup() {
                     type="email"
                     placeholder="Enter your email"
                     value={email}
-                    onChange={(event) =>
-                      setEmail(
-                        event.target.value
-                      )
-                    }
+                    onChange={(event) => {
+                      setEmail(event.target.value);
+                      setError("");
+                    }}
                     autoComplete="email"
+                    disabled={isLoading}
                     required
                   />
                 </div>
@@ -440,12 +459,12 @@ function SignupPopup() {
                     }
                     placeholder="Create a password"
                     value={password}
-                    onChange={(event) =>
-                      setPassword(
-                        event.target.value
-                      )
-                    }
+                    onChange={(event) => {
+                      setPassword(event.target.value);
+                      setError("");
+                    }}
                     autoComplete="new-password"
+                    disabled={isLoading}
                     required
                   />
 
@@ -462,6 +481,7 @@ function SignupPopup() {
                         ? "Hide password"
                         : "Show password"
                     }
+                    disabled={isLoading}
                   >
                     {showPassword ? (
                       <EyeOff size={18} />
@@ -494,12 +514,14 @@ function SignupPopup() {
                     }
                     placeholder="Confirm your password"
                     value={confirmPassword}
-                    onChange={(event) =>
+                    onChange={(event) => {
                       setConfirmPassword(
                         event.target.value
-                      )
-                    }
+                      );
+                      setError("");
+                    }}
                     autoComplete="new-password"
+                    disabled={isLoading}
                     required
                   />
 
@@ -516,6 +538,7 @@ function SignupPopup() {
                         ? "Hide password"
                         : "Show password"
                     }
+                    disabled={isLoading}
                   >
                     {showConfirmPassword ? (
                       <EyeOff size={18} />
@@ -532,6 +555,7 @@ function SignupPopup() {
                 <input
                   type="checkbox"
                   required
+                  disabled={isLoading}
                 />
 
                 <span>
@@ -584,6 +608,7 @@ function SignupPopup() {
                 type="button"
                 className="signup-login-link"
                 onClick={handleLogin}
+                disabled={isLoading}
               >
                 Sign In
               </button>
@@ -596,6 +621,3 @@ function SignupPopup() {
 }
 
 export default SignupPopup;
-
-
-
